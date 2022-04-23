@@ -1,11 +1,11 @@
 package com.sweetNet.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import com.sweetNet.model.Member;
 
-@Repository
 public interface MemberRepository extends JpaRepository<Member, String> {
-
+	List<Member> findByMemSex(Integer mem_sex);
 }

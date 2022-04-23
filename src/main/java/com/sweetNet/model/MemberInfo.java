@@ -17,94 +17,90 @@ public class MemberInfo implements Serializable {
 	 */
 	private static long serialVersionUID = 1L;
 	@Id
-	@Column(name = "meminfo_uuid")
-	private String meminfo_uuid;
+	@Column(name = "mem_Uuid")
+	private String memUuid;
 
-	@Column(name = "mem_uuid")
-	private String mem_uuid;
+	@Column(name = "mem_Name")
+	private String memName;
 
-	@Column(name = "mem_name")
-	private String mem_name;
+	@Column(name = "mem_Phone")
+	private String memPhone;
 
-	@Column(name = "mem_phone")
-	private String mem_phone;
+	@Column(name = "mem_Birthday")
+	private String memBirthday;
 
-	@Column(name = "mem_birthday")
-	private String mem_birthday;
+	@Column(name = "mem_Age")
+	private Integer memAge;
 
-	@Column(name = "mem_age")
-	private Integer mem_age;
+	@Column(name = "mem_Address")
+	private String memAddress;
 
-	@Column(name = "mem_address")
-	private String mem_address;
+	@Column(name = "mem_Height")
+	private Integer memHeight;
 
-	@Column(name = "mem_height")
-	private Integer mem_height;
+	@Column(name = "mem_Weight")
+	private Integer memWeight;
 
-	@Column(name = "mem_weight")
-	private Integer mem_weight;
+	@Column(name = "mem_Edu")
+	private Integer memEdu;
 
-	@Column(name = "mem_edu")
-	private Integer mem_edu;
+	@Column(name = "mem_Marry")
+	private Integer memMarry;
 
-	@Column(name = "mem_marry")
-	private Integer mem_marry;
+	@Column(name = "mem_Alcohol")
+	private Integer memAlcohol;
 
-	@Column(name = "mem_alcohol")
-	private Integer mem_alcohol;
+	@Column(name = "mem_Smoke")
+	private Integer memSmoke;
 
-	@Column(name = "mem_smoke")
-	private Integer mem_smoke;
+	@Column(name = "mem_Income")
+	private Integer memIncome;
 
-	@Column(name = "mem_income")
-	private Integer mem_income;
+	@Column(name = "mem_Assets")
+	private Integer memAssets;
 
-	@Column(name = "mem_assets")
-	private Integer mem_assets;
+	@Column(name = "mem_Isvip")
+	private Integer memIsvip;
 
-	@Column(name = "mem_isvip")
-	private Integer mem_isvip;
+	@Column(name = "mem_Rdate")
+	private String memRdate;
 
-	@Column(name = "mem_rdate")
-	private String mem_rdate;
+	@Column(name = "mem_Lgd")
+	private Integer memLgd;
 
-	@Column(name = "mem_lgd")
-	private Integer mem_lgd;
-
-	@Column(name = "mem_sta")
-	private Integer mem_sta;
+	@Column(name = "mem_Sta")
+	private Integer memSta;
 
 	public MemberInfo() {
 		super();
 	}
 
-	public MemberInfo(String meminfo_uuid, String mem_uuid, String mem_name, String mem_phone, String mem_birthday,
-			String mem_address, Integer mem_age, Integer mem_height, Integer mem_weight, Integer mem_edu,
-			Integer mem_marry, Integer mem_alcohol, Integer mem_smoke, Integer mem_income, Integer mem_assets,
-			Integer mem_isvip, String mem_rdate, Integer mem_lgd, Integer mem_sta) {
+	public MemberInfo(String memUuid, String memName, String memPhone, String memBirthday, String memAddress,
+			Integer memAge, Integer memHeight, Integer memWeight, Integer memEdu, Integer memMarry,
+			Integer memAlcohol, Integer memSmoke, Integer memIncome, Integer memAssets, Integer memIsvip,
+			String memRdate, Integer memLgd, Integer memSta) {
 		super();
-		this.meminfo_uuid = meminfo_uuid;
-		this.mem_uuid = mem_uuid;
-		this.mem_name = mem_name;
-		this.mem_phone = mem_phone;
-		this.mem_birthday = mem_birthday;
+		this.memUuid = memUuid;
+		this.memName = memName;
+		this.memPhone = memPhone;
+		this.memBirthday = memBirthday;
 
-		this.mem_address = mem_address;
-		this.mem_age = mem_age;
-		this.mem_height = mem_height;
-		this.mem_weight = mem_weight;
-		this.mem_edu = mem_edu;
+		this.memAddress = memAddress;
+		this.memAge = memAge;
+		this.memHeight = memHeight;
+		this.memWeight = memWeight;
+		this.memEdu = memEdu;
 
-		this.mem_marry = mem_marry;
-		this.mem_alcohol = mem_alcohol;
-		this.mem_smoke = mem_smoke;
-		this.mem_income = mem_income;
-		this.mem_assets = mem_assets;
+		this.memMarry = memMarry;
+		this.memAlcohol = memAlcohol;
+		this.memSmoke = memSmoke;
+		this.memIncome = memIncome;
+		this.memAssets = memAssets;
 
-		this.mem_isvip = mem_isvip;
-		this.mem_rdate = mem_rdate;
-		this.mem_lgd = mem_lgd;
-		this.mem_sta = mem_sta;
+		this.memIsvip = memIsvip;
+		this.memRdate = memRdate;
+		this.memLgd = memLgd;
+		this.memSta = memSta;
 	}
 
 	public static long getSerialVersionUID() {
@@ -115,180 +111,171 @@ public class MemberInfo implements Serializable {
 		MemberInfo.serialVersionUID = serialVersionUID;
 	}
 
-	public String getMeminfo_uuid() {
-		return meminfo_uuid;
+	public String getMemUuid() {
+		return memUuid;
 	}
 
-	public void setMeminfo_uuid(String meminfo_uuid) {
-		this.meminfo_uuid = meminfo_uuid;
+	public void setMemUuid(String memUuid) {
+		this.memUuid = memUuid;
 	}
 
-	public String getMem_uuid() {
-		return mem_uuid;
+	public String getMemName() {
+		return memName;
 	}
 
-	public void setMem_uuid(String mem_uuid) {
-		this.mem_uuid = mem_uuid;
+	public void setMemName(String memName) {
+		this.memName = memName;
 	}
 
-	public String getMem_name() {
-		return mem_name;
+	public String getMemPhone() {
+		return memPhone;
 	}
 
-	public void setMem_name(String mem_name) {
-		this.mem_name = mem_name;
+	public void setMemPhone(String memPhone) {
+		this.memPhone = memPhone;
 	}
 
-	public String getMem_phone() {
-		return mem_phone;
+	public String getMemBirthday() {
+		return memBirthday;
 	}
 
-	public void setMem_phone(String mem_phone) {
-		this.mem_phone = mem_phone;
+	public void setMemBirthday(String memBirthday) {
+		this.memBirthday = memBirthday;
 	}
 
-	public String getMem_birthday() {
-		return mem_birthday;
+	public Integer getMemAge() {
+		return memAge;
 	}
 
-	public void setMem_birthday(String mem_birthday) {
-		this.mem_birthday = mem_birthday;
+	public void setMemAge(Integer memAge) {
+		this.memAge = memAge;
 	}
 
-	public Integer getMem_age() {
-		return mem_age;
+	public String getMemAddress() {
+		return memAddress;
 	}
 
-	public void setMem_age(Integer mem_age) {
-		this.mem_age = mem_age;
+	public void setMemAddress(String memAddress) {
+		this.memAddress = memAddress;
 	}
 
-	public String getMem_address() {
-		return mem_address;
+	public Integer getMemHeight() {
+		return memHeight;
 	}
 
-	public void setMem_address(String mem_address) {
-		this.mem_address = mem_address;
+	public void setMemHeight(Integer memHeight) {
+		this.memHeight = memHeight;
 	}
 
-	public Integer getMem_height() {
-		return mem_height;
+	public Integer getMemWeight() {
+		return memWeight;
 	}
 
-	public void setMem_height(Integer mem_height) {
-		this.mem_height = mem_height;
+	public void setMemWeight(Integer memWeight) {
+		this.memWeight = memWeight;
 	}
 
-	public Integer getMem_weight() {
-		return mem_weight;
+	public Integer getMemEdu() {
+		return memEdu;
 	}
 
-	public void setMem_weight(Integer mem_weight) {
-		this.mem_weight = mem_weight;
+	public void setMemEdu(Integer memEdu) {
+		this.memEdu = memEdu;
 	}
 
-	public Integer getMem_edu() {
-		return mem_edu;
+	public Integer getMemMarry() {
+		return memMarry;
 	}
 
-	public void setMem_edu(Integer mem_edu) {
-		this.mem_edu = mem_edu;
+	public void setMemMarry(Integer memMarry) {
+		this.memMarry = memMarry;
 	}
 
-	public Integer getMem_marry() {
-		return mem_marry;
+	public Integer getMemAlcohol() {
+		return memAlcohol;
 	}
 
-	public void setMem_marry(Integer mem_marry) {
-		this.mem_marry = mem_marry;
+	public void setMemAlcohol(Integer memAlcohol) {
+		this.memAlcohol = memAlcohol;
 	}
 
-	public Integer getMem_alcohol() {
-		return mem_alcohol;
+	public Integer getMemSmoke() {
+		return memSmoke;
 	}
 
-	public void setMem_alcohol(Integer mem_alcohol) {
-		this.mem_alcohol = mem_alcohol;
+	public void setMemSmoke(Integer memSmoke) {
+		this.memSmoke = memSmoke;
 	}
 
-	public Integer getMem_smoke() {
-		return mem_smoke;
+	public Integer getMemIncome() {
+		return memIncome;
 	}
 
-	public void setMem_smoke(Integer mem_smoke) {
-		this.mem_smoke = mem_smoke;
+	public void setMemIncome(Integer memIncome) {
+		this.memIncome = memIncome;
 	}
 
-	public Integer getMem_income() {
-		return mem_income;
+	public Integer getMemAssets() {
+		return memAssets;
 	}
 
-	public void setMem_income(Integer mem_income) {
-		this.mem_income = mem_income;
+	public void setMemAssets(Integer memAssets) {
+		this.memAssets = memAssets;
 	}
 
-	public Integer getMem_assets() {
-		return mem_assets;
+	public Integer getMemIsvip() {
+		return memIsvip;
 	}
 
-	public void setMem_assets(Integer mem_assets) {
-		this.mem_assets = mem_assets;
+	public void setMemIsvip(Integer memIsvip) {
+		this.memIsvip = memIsvip;
 	}
 
-	public Integer getMem_isvip() {
-		return mem_isvip;
+	public String getMemRdate() {
+		return memRdate;
 	}
 
-	public void setMem_isvip(Integer mem_isvip) {
-		this.mem_isvip = mem_isvip;
+	public void setMemRdate(String memRdate) {
+		this.memRdate = memRdate;
 	}
 
-	public String getMem_rdate() {
-		return mem_rdate;
+	public Integer getMemLgd() {
+		return memLgd;
 	}
 
-	public void setMem_rdate(String mem_rdate) {
-		this.mem_rdate = mem_rdate;
+	public void setMemLgd(Integer memLgd) {
+		this.memLgd = memLgd;
 	}
 
-	public Integer getMem_lgd() {
-		return mem_lgd;
+	public Integer getMemSta() {
+		return memSta;
 	}
 
-	public void setMem_lgd(Integer mem_lgd) {
-		this.mem_lgd = mem_lgd;
-	}
-
-	public Integer getMem_sta() {
-		return mem_sta;
-	}
-
-	public void setMem_sta(Integer mem_sta) {
-		this.mem_sta = mem_sta;
+	public void setMemSta(Integer memSta) {
+		this.memSta = memSta;
 	}
 
 	public JSONObject toJson() {
 		JSONObject json = new JSONObject();
 
-		json.put("meminfo_uuid", meminfo_uuid);
-		json.put("mem_uuid", mem_uuid);
-		json.put("mem_name", mem_name);
-		json.put("mem_phone", mem_phone);
-		json.put("mem_birthday", mem_birthday);
-		json.put("mem_age", mem_age);
-		json.put("mem_address", mem_address);
-		json.put("mem_height", mem_height);
-		json.put("mem_weight", mem_weight);
-		json.put("mem_edu", mem_edu);
-		json.put("mem_marry", mem_marry);
-		json.put("mem_alcohol", mem_alcohol);
-		json.put("mem_smoke", mem_smoke);
-		json.put("mem_income", mem_income);
-		json.put("mem_assets", mem_assets);
-		json.put("mem_isvip", mem_isvip);
-		json.put("mem_rdate", mem_rdate);
-		json.put("mem_lgd", mem_lgd);
-		json.put("mem_sta", mem_sta);
+		json.put("memUuid", memUuid);
+		json.put("memName", memName);
+		json.put("memPhone", memPhone);
+		json.put("memBirthday", memBirthday);
+		json.put("memAge", memAge);
+		json.put("memAddress", memAddress);
+		json.put("memHeight", memHeight);
+		json.put("memWeight", memWeight);
+		json.put("memEdu", memEdu);
+		json.put("memMarry", memMarry);
+		json.put("memAlcohol", memAlcohol);
+		json.put("memSmoke", memSmoke);
+		json.put("memIncome", memIncome);
+		json.put("memAssets", memAssets);
+		json.put("memIsvip", memIsvip);
+		json.put("memRdate", memRdate);
+		json.put("memLgd", memLgd);
+		json.put("memSta", memSta);
 
 		return json;
 	}

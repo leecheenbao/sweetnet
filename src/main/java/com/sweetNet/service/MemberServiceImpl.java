@@ -1,6 +1,6 @@
 package com.sweetNet.service;
 
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,8 +24,9 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public Optional<Member> findOne(String mem_mail) {
-		return memberRepository.findById(mem_mail);
+	public List<Member> findByMem_Sex(Integer mem_sex) {
+		return memberRepository.findByMemSex(mem_sex);
 	}
+
 
 }

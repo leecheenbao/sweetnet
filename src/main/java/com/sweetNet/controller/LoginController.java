@@ -2,6 +2,8 @@ package com.sweetNet.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,8 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
@@ -38,7 +39,7 @@ public class LoginController {
 	 * @param request
 	 * @return JSONObject
 	 */
-	@RequestMapping(value = "/POST/Login", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@PostMapping(value = "/post/Login")
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
@@ -48,35 +49,34 @@ public class LoginController {
 		String jsonStr = "";
 
 		// 移除cookie
-		Cookie cookie = new Cookie("token", null);
-		cookie.setMaxAge(0);
-		response.addCookie(cookie);
+		Cookie tokenCookie = new Cookie("token", null);
+		tokenCookie.setMaxAge(0);
+		response.addCookie(tokenCookie);
 
 		try (PrintWriter out = response.getWriter()) {
-			System.out.println("test");
 			// 驗證信箱、密碼
 			String mem_mail = jsonParam.getString("mem_mail");
 			String mem_pwd = AesHelper.encrypt(jsonParam.getString("mem_pwd"));
 
 			jsonParam.remove("mem_pwd");
-			member.setMem_mail(mem_mail);
-			member.setMem_pwd(mem_pwd);
+			member.setMemMail(mem_mail);
+			member.setMemPwd(mem_pwd);
 			Example<Member> example = Example.of(member);
 			Optional<Member> eresult = memberRepository.findOne(example);
-
 			if (eresult.isPresent()) {
 				MemberInfo memberInfo = new MemberInfo();
-				memberInfo.setMem_uuid(eresult.get().getMem_uuid());
+				memberInfo.setMemUuid(eresult.get().getMemUuid());
 				Example<MemberInfo> memberInfoExample = Example.of(memberInfo);
 				MemberInfo ud = memberInfoRepository.findOne(memberInfoExample).get();
 
 				String token = UUID.randomUUID().toString();
-				int cookieAge = (int) (60 * 60 * 0.5); // 30 min
-				cookie = new Cookie("token", token);
-				cookie.setMaxAge(cookieAge);
-				response.addCookie(cookie);
+				int cookieAge = (int) (60 * 15 * 1); // 15 min
 
-				jsonParam.put("token", token);
+				tokenCookie.setMaxAge(cookieAge);
+				tokenCookie = new Cookie("token", token);
+
+				response.addCookie(tokenCookie);
+
 				jsonParam.put("msg", "登入成功！");
 				jsonParam.put("status", "200");
 
@@ -87,8 +87,8 @@ public class LoginController {
 
 				jsonParam.put("msg", "登入失敗 !  請檢查信箱與密碼是否輸入錯誤 !?");
 				jsonParam.put("status", "500");
-
-				jsonStr = Until.organizeJson(jsonParam.toString());
+				jsonStr = jsonParam.toJSONString();
+//				jsonStr = Until.organizeJson(jsonParam.toString());
 
 				out.println(jsonStr);
 
@@ -97,6 +97,13 @@ public class LoginController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public String getDateTime() {
+		SimpleDateFormat sdFormat = new SimpleDateFormat("yyyyMMddhhmmss");
+		Date date = new Date();
+		String strDate = sdFormat.format(date);
+		return strDate;
 	}
 
 }
