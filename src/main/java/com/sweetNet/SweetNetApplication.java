@@ -10,4 +10,6 @@ public class SweetNetApplication {
 		SpringApplication.run(SweetNetApplication.class, args);
 	}
 
+	
+	
 }

@@ -8,4 +8,5 @@ public interface MemberService {
 
 	void save(Member contact);
 
+	Member findOneByUuid(String memberUuid);
 }

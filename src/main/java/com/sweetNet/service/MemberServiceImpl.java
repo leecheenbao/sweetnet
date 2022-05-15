@@ -1,8 +1,9 @@
 package com.sweetNet.service;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import com.sweetNet.model.Member;
@@ -24,9 +25,18 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public List<Member> findByMem_Sex(Integer mem_sex) {
-		return memberRepository.findByMemSex(mem_sex);
-	}
+	public Member findOneByUuid(String memUuid) {
 
+		Member m = new Member();
+		m.setMemUuid(memUuid);
+
+		Example<Member> example = Example.of(m);
+		Optional<Member> mOptional = memberRepository.findOne(example);
+
+		if (mOptional.isPresent())
+			m = mOptional.orElse(null);
+
+		return m;
+	}
 
 }

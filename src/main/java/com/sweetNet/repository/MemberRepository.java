@@ -8,4 +8,5 @@ import com.sweetNet.model.Member;
 
 public interface MemberRepository extends JpaRepository<Member, String> {
 	List<Member> findByMemSex(Integer mem_sex);
+
 }

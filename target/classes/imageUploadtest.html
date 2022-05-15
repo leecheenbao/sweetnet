@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+</head>
+<body>
+
+	<h1>測試</h1>
+
+	<label>test</label>
+	<form id="uploadForm" enctype="multipart/form-data">
+		<input type="file" id="file" name="file"/>
+
+	</form>
+	<button onclick="test" id="test">test</button>
+</body>
+<script>
+	var formData = new FormData();
+
+	
+	function test(){
+		console.log("test");
+		
+		alert("success upload");
+	}
+	
+	$( "#test" ).click(function() {
+		var imagefile = document.querySelector('#file');
+		formData.append("image", imagefile.files[0]);
+		console.log(imagefile)
+		  
+		this.$axios.post('http://localhost:8082/sweetNet/api/uploadImage', formData, {
+			headers: {
+				'Content-Type': 'multipart/form-data'
+			}
+		})
+	});
+	
+
+     
+</script>
+</html>
