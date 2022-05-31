@@ -3,9 +3,7 @@ package com.sweetNet.controller;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.sql.Blob;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,7 +18,7 @@ import javax.sql.rowset.serial.SerialBlob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -168,7 +166,7 @@ public class MessageController {
 	}
 
 	@ApiOperation("發送站內信")
-	@PutMapping("/sendMessage")
+	@PostMapping("/sendMessage")
 	public JSONObject putMessage(@RequestHeader("Authorization") String au, @RequestBody HashMap<String, String> user) {
 		// 獲取到JSONObject
 		JSONObject jsonParam = new JSONObject();
@@ -219,7 +217,7 @@ public class MessageController {
 	}
 
 	// 以下為專門處理 Blob 物件，轉換成 String，並回傳該 String
-	public String convertBlob(Blob blob) {
+	public String convertBlob(Blob blob) throws IOException {
 
 		StringBuffer temp = new StringBuffer();
 		String line = "";
@@ -233,16 +231,14 @@ public class MessageController {
 			while ((line = reader.readLine()) != null) {
 				temp.append(line).append("\n");
 			}
-		} catch (UnsupportedEncodingException e1) {
-		} catch (IOException e2) {
-		} catch (SQLException e3) {
+		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
-			try {
-				line = null;
-				if (reader != null)
-					reader.close();
-			} catch (IOException e4) {
-			}
+
+			line = null;
+			if (reader != null)
+				reader.close();
+
 		}
 		return temp.toString();
 	}

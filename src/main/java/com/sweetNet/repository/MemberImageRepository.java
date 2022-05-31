@@ -8,5 +8,5 @@ import com.sweetNet.model.MemberImage;
 
 public interface MemberImageRepository extends JpaRepository<MemberImage, String> {
 	List<MemberImage> findByMemUuid(String memUuid);
-	
+//	List<MemberImage> findByMemUuid(String memUuid);
 }

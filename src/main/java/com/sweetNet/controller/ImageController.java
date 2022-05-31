@@ -1,9 +1,12 @@
 package com.sweetNet.controller;
 
+import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,6 +63,11 @@ public class ImageController {
 					Map<String, String> filemap = Until.uploadFile(file[i].getBytes(), filePath, memUuid);
 					String imageUrl = String.valueOf(filemap.get("imageUrl"));
 
+					InetAddress address = InetAddress.getLocalHost();// 獲取本地IP位置 //PC-20140317PXKX/192.168.0.121
+					String hostAddress = address.getHostAddress();// 192.168.0.121
+
+					imageUrl = "http://" + hostAddress + imageUrl;
+
 					memberImage.setMemUuid(memUuid);
 					memberImage.setImageUrl(imageUrl);
 
@@ -78,6 +86,53 @@ public class ImageController {
 		jsonParam.put("states", states);
 		return jsonParam;
 	}
-	
-	
+
+	/**
+	 * 設定會員封面照片
+	 * 
+	 * @param request
+	 * @return JSONObject
+	 */
+	@ApiOperation("設定會員封面照片-id為imagesData中要更改為封面照片的序號")
+	@PostMapping("/coverImage/{id}")
+	public JSONObject test(@RequestHeader("Authorization") String au, @PathVariable int id) {
+		// 獲取到JSONObject
+		JSONObject jsonParam = new JSONObject();
+		String token = au.substring(7);
+		String states = ConfigInfo.DATA_OK;
+		String msg = "";
+		String memUuid = JwtTokenUtils.getJwtMemUuid(token);
+		try {
+			tokenCheck = JwtTokenUtils.validateToken(token);
+			if (tokenCheck) {
+				Iterable<MemberImage> memberImages = memberImageService.findByUuid(memUuid);
+
+				/* 檢核id是否為該會員的照片 */
+				ArrayList<Integer> checkList = new ArrayList<Integer>();
+				for (MemberImage m : memberImages) {
+					checkList.add(m.getId());
+				}
+
+				if (checkList.contains(id)) {
+					for (MemberImage m : memberImages) {
+						memberImageService.saveSeq(m, id);
+					}
+					msg = ConfigInfo.SYS_MESSAGE_SUCCESS;
+				} else {
+					states = ConfigInfo.DATA_ERR_SYS;
+					msg = "此圖片ID不屬於該會員";
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			states = ConfigInfo.DATA_ERR_SYS;
+			jsonParam.put("msg", e.getMessage());
+			jsonParam.put("states", states);
+			return jsonParam;
+		}
+		jsonParam.put("msg", msg);
+		jsonParam.put("states", states);
+		return jsonParam;
+	}
 }

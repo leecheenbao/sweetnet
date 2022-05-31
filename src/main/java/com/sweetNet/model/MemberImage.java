@@ -24,11 +24,31 @@ public class MemberImage implements Serializable {
 	@Column(name = "imageUrl")
 	private String imageUrl;
 
-	public MemberImage(Integer id, String memUuid, String imageUrl) {
+	@Column(name = "seq")
+	private int seq;
+
+	public MemberImage(Integer id, String memUuid, String imageUrl, int seq) {
 		super();
 		this.id = id;
 		this.memUuid = memUuid;
 		this.imageUrl = imageUrl;
+		this.seq = seq;
+	}
+
+	public static long getSerialVersionUID() {
+		return serialVersionUID;
+	}
+
+	public static void setSerialVersionUID(long serialVersionUID) {
+		MemberImage.serialVersionUID = serialVersionUID;
+	}
+
+	public int getSeq() {
+		return seq;
+	}
+
+	public void setSeq(int seq) {
+		this.seq = seq;
 	}
 
 	public MemberImage() {

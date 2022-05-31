@@ -1,5 +1,6 @@
 package com.sweetNet.controller;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +37,7 @@ import com.sweetNet.service.MemberImageService;
 import com.sweetNet.service.MemberService;
 import com.sweetNet.until.AesHelper;
 import com.sweetNet.until.ConfigInfo;
+import com.sweetNet.until.GetLocalJSON;
 import com.sweetNet.until.JwtTokenUtils;
 import com.sweetNet.until.Until;
 
@@ -153,7 +156,7 @@ public class MemberController {
 	@ApiOperation("填寫會員資料")
 	@PutMapping(value = "/user")
 	public JSONObject createAccountInfo(@RequestHeader("Authorization") String au,
-			@ApiParam("UUID：memUuid、姓名：memName、電話：memPhone、生日(YYYY/MM/DD)：memBirthday、年齡：memAge、身高：memHeight、"
+			@ApiParam("UUID：memUuid、姓名：memName、電話：memPhone、生日(YYYY/MM/DD)：memBirthday、地址:memAddress、縣市區域：memArea、年齡：memAge、身高：memHeight、"
 					+ "體重：memWeight、教育程度(1：高中、2：二專五專、3：學士、4：碩士、5:博士、)：memEdu、婚姻狀況(1未婚2已婚)：memMarry、飲酒習慣(1經常2偶爾3從不)：memAlcohol、吸菸習慣(1經常2偶爾3從不)：memSmoke、年收入：memIncome、"
 					+ "資產(萬)：memAssets、VIP狀態(0：一般、1：VIP):memIsvip") @RequestBody HashMap<String, String> user) {
 
@@ -175,6 +178,7 @@ public class MemberController {
 				String memBirthday = user.get("memBirthday");
 				Integer memAge = Integer.valueOf(user.get("memAge"));
 				String memAddress = user.get("memAddress");
+				String memArea = user.get("memArea");
 				Integer memHeight = Integer.valueOf(user.get("memHeight"));
 				Integer memWeight = Integer.valueOf(user.get("memWeight"));
 				Integer memEdu = Integer.valueOf(user.get("memEdu"));
@@ -211,6 +215,7 @@ public class MemberController {
 				member.setMemBirthday(memBirthday);
 				member.setMemAge(memAge);
 				member.setMemAddress(memAddress);
+				member.setMemArea(memArea);
 				member.setMemHeight(memHeight);
 				member.setMemWeight(memWeight);
 				member.setMemEdu(memEdu);
@@ -268,6 +273,10 @@ public class MemberController {
 				Example<Member> example = Example.of(member);
 				Member ud = memberRepository.findOne(example).get();
 				result.put("data", ud.toJson());
+
+				List<MemberImage> memberImageList = memberImageRepository.findByMemUuid(memUuid);
+				result.put("imagesData", memberImageList);
+				
 				states = ConfigInfo.DATA_OK;
 				msg = "success";
 			}
@@ -286,9 +295,74 @@ public class MemberController {
 	 * @param request
 	 * @return JSONObject
 	 */
+	@ApiOperation("顯示會員資料 - 以登入會員的性別分類，男生只能看到女生、女生只能看到男生並加入以縣市搜尋")
+	@GetMapping(value = "/users/{city}")
+	public JSONObject getUserInfoByCity(@RequestHeader("Authorization") String au, @PathVariable String city) {
+		JSONObject result = new JSONObject();
+		String token = au.substring(7);
+		String msg = "success";
+		String states = ConfigInfo.DATA_OK;
+
+		try {
+
+			String memUuid = JwtTokenUtils.getJwtMemUuid(token);
+			tokenCheck = JwtTokenUtils.validateToken(token);
+
+			if (tokenCheck) {
+
+				Member member = new Member();
+				member.setMemUuid(memUuid);
+				Example<Member> example = Example.of(member);
+				Optional<Member> memberData = memberRepository.findOne(example);
+				Integer memSex = memberData.get().getMemSex();
+				String memArea = city;
+				List<Member> memberList = null;
+
+				/* 取得異性代碼 */
+				if (memSex == 1) {
+					memSex = 2;
+					memberList = (List<Member>) memberRepository.findByMemSexAndMemArea(memSex, memArea);
+				} else if (memSex == 2) {
+					memSex = 1;
+					memberList = (List<Member>) memberRepository.findByMemSexAndMemArea(memSex, memArea);
+				} else if (memSex == 0) {
+					memberList = (List<Member>) memberRepository.findAll();
+				}
+
+				Gson gson = new Gson();
+				JSONArray jsonArray = new JSONArray();
+
+				jsonArray = JSON.parseArray(gson.toJson(memberList));
+				/* 整理json */
+				for (int i = 0; i < jsonArray.size(); i++) {
+					JSONObject j = (JSONObject) jsonArray.get(i);
+					List<MemberImage> memberImageList = memberImageRepository.findByMemUuid((String) j.get("memUuid"));
+					j.put("ImageData", memberImageList);
+					// j.put(key, value)
+					j.remove("memPwd");
+				}
+				result.put("data", jsonArray);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			states = ConfigInfo.DATA_FAIL;
+			msg = "error";
+		}
+
+		result.put("states", states);
+		result.put("msg", msg);
+		return result;
+	}
+
+	/**
+	 * 顯示會員資料 - 以性別分類男生只能看到女生，女生只能看到男生
+	 * 
+	 * @param request
+	 * @return JSONObject
+	 */
 	@ApiOperation("顯示會員資料 - 以登入會員的性別分類，男生只能看到女生、女生只能看到男生")
 	@GetMapping(value = "/users")
-	public JSONObject getUserInfoForSex(@RequestHeader("Authorization") String au) {
+	public JSONObject getUserInfoBySex(@RequestHeader("Authorization") String au) {
 		JSONObject result = new JSONObject();
 		String token = au.substring(7);
 		String msg = "success";
@@ -308,7 +382,7 @@ public class MemberController {
 				Integer memSex = memberData.get().getMemSex();
 
 				List<Member> memberList = null;
-				
+
 				/* 取得異性代碼 */
 				if (memSex == 1) {
 					memSex = 2;
@@ -343,6 +417,20 @@ public class MemberController {
 		result.put("states", states);
 		result.put("msg", msg);
 		return result;
+	}
+
+	@ApiOperation("取得縣市資料")
+	@GetMapping(value = "/country")
+	public JSONArray getCountry() {
+		JSONArray jsonArray = new JSONArray();
+		try {
+			File file = new File("country.json");
+			jsonArray = GetLocalJSON.getCityJSON();
+			System.out.println(jsonArray);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return jsonArray;
 	}
 
 }

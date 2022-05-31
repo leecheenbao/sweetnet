@@ -41,7 +41,7 @@ public class SwaggerConfig {
 
 	// 設定Swagger資訊
 	private ApiInfo apiInfo() {
-		return new ApiInfo("SweetNet", "我的Swagger API檔案", "1.0", "",
+		return new ApiInfo("SweetNet", "MySwagger API", "1.2", "",
 				new Contact("PaulLee", "", "leecheenbao@gmail.com"), // 作者資訊
 				"Apache 2.0", "http://www.apache.org/licenses/LICENSE-2.0", new ArrayList<VendorExtension>());
 	}

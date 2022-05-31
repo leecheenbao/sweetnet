@@ -51,6 +51,9 @@ public class Member implements Serializable {
 	@Column(name = "memAddress")
 	private String memAddress;
 
+	@Column(name = "memArea")
+	private String memArea;
+
 	@Column(name = "memHeight")
 	private Integer memHeight;
 
@@ -92,9 +95,10 @@ public class Member implements Serializable {
 	}
 
 	public Member(String memUuid, String memMail, String memPwd, String memNickname, String memDep, Integer memSex,
-			String memName, String memPhone, String memBirthday, String memAddress, Integer memAge, Integer memHeight,
-			Integer memWeight, Integer memEdu, Integer memMarry, Integer memAlcohol, Integer memSmoke,
-			Integer memIncome, Integer memAssets, Integer memIsvip, String memRdate, Integer memLgd, Integer memSta) {
+			String memName, String memPhone, String memBirthday, String memAddress, String memArea, Integer memAge,
+			Integer memHeight, Integer memWeight, Integer memEdu, Integer memMarry, Integer memAlcohol,
+			Integer memSmoke, Integer memIncome, Integer memAssets, Integer memIsvip, String memRdate, Integer memLgd,
+			Integer memSta) {
 		super();
 		this.memUuid = memUuid;
 		this.memMail = memMail;
@@ -107,6 +111,7 @@ public class Member implements Serializable {
 		this.memBirthday = memBirthday;
 
 		this.memAddress = memAddress;
+		this.memArea = memArea;
 		this.memAge = memAge;
 		this.memHeight = memHeight;
 		this.memWeight = memWeight;
@@ -123,7 +128,6 @@ public class Member implements Serializable {
 		this.memLgd = memLgd;
 		this.memSta = memSta;
 	}
-
 
 	public static long getSerialVersionUID() {
 		return serialVersionUID;
@@ -317,6 +321,14 @@ public class Member implements Serializable {
 		this.memSta = memSta;
 	}
 
+	public String getMemArea() {
+		return memArea;
+	}
+
+	public void setMemArea(String memArea) {
+		this.memArea = memArea;
+	}
+
 	public JSONObject toJson() {
 		JSONObject json = new JSONObject();
 
@@ -330,6 +342,7 @@ public class Member implements Serializable {
 		json.put("memBirthday", memBirthday);
 		json.put("memAge", memAge);
 		json.put("memAddress", memAddress);
+		json.put("memArea", memArea);
 		json.put("memHeight", memHeight);
 		json.put("memWeight", memWeight);
 		json.put("memEdu", memEdu);

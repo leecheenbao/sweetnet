@@ -21,4 +21,22 @@ public class MemberImageServiceImpl implements MemberImageService {
 		memberImageRepository.save(contact);
 	}
 
+	@Override
+	public Iterable<MemberImage> findByUuid(String uuid) {
+		Iterable<MemberImage> members = memberImageRepository.findByMemUuid(uuid);
+		return members;
+	}
+
+	@Override
+	public void saveSeq(MemberImage contact, int id) {
+		
+		if (contact.getId() == id) {
+			contact.setSeq(1);
+		} else {
+			contact.setSeq(2);
+		}
+
+		memberImageRepository.save(contact);
+	}
+
 }
