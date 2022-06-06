@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jboss.aerogear.security.otp.api.Base32;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +30,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
+import com.infobip.sms.SendSmsBasic;
 import com.sweetNet.model.Member;
 import com.sweetNet.model.MemberImage;
 import com.sweetNet.repository.MemberImageRepository;
@@ -39,6 +41,7 @@ import com.sweetNet.until.AesHelper;
 import com.sweetNet.until.ConfigInfo;
 import com.sweetNet.until.GetLocalJSON;
 import com.sweetNet.until.JwtTokenUtils;
+import com.sweetNet.until.PhoneUtil;
 import com.sweetNet.until.Until;
 
 import io.swagger.annotations.Api;
@@ -276,7 +279,7 @@ public class MemberController {
 
 				List<MemberImage> memberImageList = memberImageRepository.findByMemUuid(memUuid);
 				result.put("imagesData", memberImageList);
-				
+
 				states = ConfigInfo.DATA_OK;
 				msg = "success";
 			}
@@ -431,6 +434,84 @@ public class MemberController {
 			e.printStackTrace();
 		}
 		return jsonArray;
+	}
+
+	@ApiOperation("發送OTP簡訊")
+	@PostMapping(value = "/sendSMS")
+	public JSONObject sendSMS(@RequestHeader("Authorization") String au, @RequestBody HashMap<String, String> user) {
+		JSONObject result = new JSONObject();
+		String token = au.substring(7);
+		String msg = "success";
+		String states = ConfigInfo.DATA_OK;
+
+		try {
+
+			String memUuid = JwtTokenUtils.getJwtMemUuid(token);
+			tokenCheck = JwtTokenUtils.validateToken(token);
+
+			if (tokenCheck) {
+				PhoneUtil pu = new PhoneUtil();
+				String phoneNumber = user.get("phoneNumber");
+				String recipient = pu.checkPhone(phoneNumber);
+				String secret = Base32.random();
+				String OTP = pu.creatOTP(secret);
+				String messageText = String.valueOf(OTP);
+
+				SendSmsBasic ssb = new SendSmsBasic();
+				ssb.sendSMS(recipient, messageText);
+
+				result.put("secret", secret);
+				result.put("OTP", OTP);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			states = ConfigInfo.DATA_FAIL;
+			msg = "error";
+		}
+		result.put("states", states);
+		result.put("msg", msg);
+		return result;
+	}
+
+	@ApiOperation("驗證OTP簡訊")
+	@PostMapping(value = "/verifyOTP")
+	public JSONObject verifyOTP(@RequestHeader("Authorization") String au, @RequestBody HashMap<String, String> user) {
+		JSONObject result = new JSONObject();
+		String token = au.substring(7);
+		String msg = "success";
+		String states = ConfigInfo.DATA_OK;
+
+		try {
+			tokenCheck = JwtTokenUtils.validateToken(token);
+			String memUuid = JwtTokenUtils.getJwtMemUuid(token);
+			if (tokenCheck) {
+				PhoneUtil pu = new PhoneUtil();
+				String OTP = user.get("OTP");
+				String secret = user.get("secret");
+				Boolean verifyOTP = pu.verifyOTP(secret, OTP);
+
+				if (verifyOTP) {
+					Member member = new Member();
+					member.setMemUuid(memUuid);
+					Example<Member> memberExample = Example.of(member);
+					member = memberRepository.findOne(memberExample).get();
+
+					member.setPhoneStates(1);;
+					memberService.save(member);
+				}
+				result.put("verifyOTP", verifyOTP);
+
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			states = ConfigInfo.DATA_FAIL;
+			msg = "error";
+		}
+		result.put("states", states);
+		result.put("msg", msg);
+		return result;
 	}
 
 }

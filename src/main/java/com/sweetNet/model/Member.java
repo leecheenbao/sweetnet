@@ -42,6 +42,9 @@ public class Member implements Serializable {
 	@Column(name = "memPhone")
 	private String memPhone;
 
+	@Column(name = "phoneStates")
+	private Integer phoneStates;
+
 	@Column(name = "memBirthday")
 	private String memBirthday;
 
@@ -95,8 +98,8 @@ public class Member implements Serializable {
 	}
 
 	public Member(String memUuid, String memMail, String memPwd, String memNickname, String memDep, Integer memSex,
-			String memName, String memPhone, String memBirthday, String memAddress, String memArea, Integer memAge,
-			Integer memHeight, Integer memWeight, Integer memEdu, Integer memMarry, Integer memAlcohol,
+			String memName, String memPhone, Integer phoneStates, String memBirthday, String memAddress, String memArea,
+			Integer memAge, Integer memHeight, Integer memWeight, Integer memEdu, Integer memMarry, Integer memAlcohol,
 			Integer memSmoke, Integer memIncome, Integer memAssets, Integer memIsvip, String memRdate, Integer memLgd,
 			Integer memSta) {
 		super();
@@ -108,6 +111,7 @@ public class Member implements Serializable {
 		this.memSex = memSex;
 		this.memName = memName;
 		this.memPhone = memPhone;
+		this.phoneStates = phoneStates;
 		this.memBirthday = memBirthday;
 
 		this.memAddress = memAddress;
@@ -199,6 +203,14 @@ public class Member implements Serializable {
 
 	public void setMemPhone(String memPhone) {
 		this.memPhone = memPhone;
+	}
+
+	public Integer getPhoneStates() {
+		return phoneStates;
+	}
+
+	public void setPhoneStates(Integer phoneStates) {
+		this.phoneStates = phoneStates;
 	}
 
 	public String getMemBirthday() {
