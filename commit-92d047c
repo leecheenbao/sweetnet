@@ -1,0 +1,923 @@
+From 92d047c463e1f8d2150aa6e68dcdf02a63aae2c5 Mon Sep 17 00:00:00 2001
+From: Paul <leecheenbao@gmail.com>
+Date: Tue, 7 Jun 2022 00:22:04 +0800
+Subject: OTP簡訊發送、OTP驗證
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+
+diff --git a/pom.xml b/pom.xml
+index 7e13532..f1345c5 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -1,7 +1,7 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project xmlns="http://maven.apache.org/POM/4.0.0"
+ 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
++	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+ 	<modelVersion>4.0.0</modelVersion>
+ 	<parent>
+ 		<groupId>org.springframework.boot</groupId>
+@@ -104,6 +104,35 @@
+ 			<artifactId>httpcore</artifactId>
+ 			<version>4.4.1</version>
+ 		</dependency>
++
++		<dependency>
++			<groupId>com.sun.mail</groupId>
++			<artifactId>javax.mail</artifactId>
++			<version>1.6.2</version>
++		</dependency>
++
++		<dependency>
++			<groupId>com.infobip</groupId>
++			<artifactId>infobip-api-java-client</artifactId>
++			<version>3.2.0</version>
++		</dependency>
++
++
++		<!-- 电话号码工具类 -->
++		<dependency>
++			<groupId>com.googlecode.libphonenumber</groupId>
++			<artifactId>geocoder</artifactId>
++			<version>2.12</version>
++		</dependency>
++		<!-- 电话号码工具类 END -->
++
++		<!-- https://mvnrepository.com/artifact/org.jboss.aerogear/aerogear-otp-java -->
++		<dependency>
++			<groupId>org.jboss.aerogear</groupId>
++			<artifactId>aerogear-otp-java</artifactId>
++			<version>1.0.0</version>
++		</dependency>
++
+ 	</dependencies>
+ 
+ 
+@@ -114,7 +143,7 @@
+ 				<groupId>org.springframework.boot</groupId>
+ 				<artifactId>spring-boot-maven-plugin</artifactId>
+ 			</plugin>
+-			
++
+ 			<plugin>
+ 				<groupId>com.spotify</groupId>
+ 				<artifactId>dockerfile-maven-plugin</artifactId>
+diff --git a/src/main/java/com/infobip/sms/SendSmsBasic.java b/src/main/java/com/infobip/sms/SendSmsBasic.java
+new file mode 100644
+index 0000000..4c52840
+--- /dev/null
++++ b/src/main/java/com/infobip/sms/SendSmsBasic.java
+@@ -0,0 +1,78 @@
++package com.infobip.sms;
++
++import java.io.IOException;
++
++import okhttp3.MediaType;
++import okhttp3.OkHttpClient;
++import okhttp3.Request;
++import okhttp3.RequestBody;
++import okhttp3.Response;
++
++/**
++ * Send an SMS message directly by calling HTTP endpoint.
++ *
++ * THIS CODE EXAMPLE IS READY BY DEFAULT. HIT RUN TO SEND THE MESSAGE!
++ *
++ * Send SMS API reference:
++ * https://www.infobip.com/docs/api#channels/sms/send-sms-message See Readme
++ * file for details.
++ */
++public class SendSmsBasic {
++
++	private static final String BASE_URL = "https://4mwm9m.api.infobip.com";
++	private static final String API_KEY = "App b0b5721ba401bbb11dbf88a43e836d78-0dcc4e31-69c1-4efd-b029-b9d60bc7b357";
++	private static final String MEDIA_TYPE = "application/json";
++
++	private static final String SENDER = "InfoSMS";
++	private static final String RECIPIENT = "886919268790";
++	private static final String MESSAGE_TEXT = "This is a sample message test";
++
++	public static void main(String[] args) throws IOException {
++		OkHttpClient client = new OkHttpClient().newBuilder().build();
++
++		String bodyJson = String.format(
++				"{\"messages\":[{\"from\":\"%s\",\"destinations\":[{\"to\":\"%s\"}],\"text\":\"%s\"}]}", SENDER,
++				RECIPIENT, MESSAGE_TEXT);
++
++		MediaType mediaType = MediaType.parse(MEDIA_TYPE);
++		RequestBody body = RequestBody.create(mediaType, bodyJson);
++
++		Request request = prepareHttpRequest(body);
++		Response response = client.newCall(request).execute();
++
++		System.out.println("HTTP status code: " + response.code());
++		System.out.println("Response body: " + response.body().string());
++
++		SendSmsBasic ssb = new SendSmsBasic();
++		ssb.sendSMS(RECIPIENT, MESSAGE_TEXT);
++	}
++
++	private static Request prepareHttpRequest(RequestBody body) {
++		return new Request.Builder().url(String.format("%s/sms/2/text/advanced", BASE_URL)).method("POST", body)
++				.addHeader("Authorization", API_KEY).addHeader("Content-Type", MEDIA_TYPE)
++				.addHeader("Accept", MEDIA_TYPE).build();
++	}
++
++	public static void sendSMS(String recipient, String messageText) {
++		OkHttpClient client = new OkHttpClient().newBuilder().build();
++		try {
++			String bodyJson = String.format(
++					"{\"messages\":[{\"from\":\"%s\",\"destinations\":[{\"to\":\"%s\"}],\"text\":\"%s\"}]}", SENDER,
++					recipient, messageText);
++
++			MediaType mediaType = MediaType.parse(MEDIA_TYPE);
++			RequestBody body = RequestBody.create(mediaType, bodyJson);
++
++			Request request = prepareHttpRequest(body);
++			Response response = client.newCall(request).execute();
++			System.out.println("HTTP status code: " + response.code());
++			System.out.println("Response body: " + response.body().string());
++
++			response = client.newCall(request).execute();
++		} catch (IOException e) {
++			// TODO Auto-generated catch block
++			e.printStackTrace();
++		}
++
++	}
++}
+diff --git a/src/main/java/com/infobip/sms/SendSmsLib.java b/src/main/java/com/infobip/sms/SendSmsLib.java
+new file mode 100644
+index 0000000..1a79fb9
+--- /dev/null
++++ b/src/main/java/com/infobip/sms/SendSmsLib.java
+@@ -0,0 +1,62 @@
++package com.infobip.sms;
++
++import java.util.Collections;
++
++import com.infobip.ApiClient;
++import com.infobip.ApiException;
++import com.infobip.api.SendSmsApi;
++import com.infobip.model.SmsAdvancedTextualRequest;
++import com.infobip.model.SmsDestination;
++import com.infobip.model.SmsResponse;
++import com.infobip.model.SmsTextualMessage;
++
++/**
++ * Send an SMS message by using Infobip API Java Client.
++ *
++ * THIS CODE EXAMPLE IS READY BY DEFAULT. HIT RUN TO SEND THE MESSAGE!
++ *
++ * Send SMS API reference:
++ * https://www.infobip.com/docs/api#channels/sms/send-sms-message See Readme
++ * file for details.
++ */
++public class SendSmsLib {
++
++	private static final String BASE_URL = "https://4mwm9m.api.infobip.com";
++	private static final String API_KEY = "b0b5721ba401bbb11dbf88a43e836d78-0dcc4e31-69c1-4efd-b029-b9d60bc7b357";
++
++	private static final String SENDER = "InfoSMS";
++	private static final String RECIPIENT = "886919268790";
++	private static final String MESSAGE_TEXT = "This is a sample message";
++
++	public static void main(String[] args) {
++		ApiClient client = initApiClient();
++
++		SendSmsApi sendSmsApi = new SendSmsApi(client);
++
++		SmsTextualMessage smsMessage = new SmsTextualMessage().from(SENDER)
++				.addDestinationsItem(new SmsDestination().to(RECIPIENT)).text(MESSAGE_TEXT);
++
++		SmsAdvancedTextualRequest smsMessageRequest = new SmsAdvancedTextualRequest()
++				.messages(Collections.singletonList(smsMessage));
++
++		try {
++			SmsResponse smsResponse = sendSmsApi.sendSmsMessage(smsMessageRequest);
++			System.out.println("Response body: " + smsResponse);
++		} catch (ApiException e) {
++			System.out.println("HTTP status code: " + e.getCode());
++			System.out.println("Response body: " + e.getResponseBody());
++		}
++	}
++
++	private static ApiClient initApiClient() {
++		ApiClient client = new ApiClient();
++
++		client.setApiKeyPrefix("App");
++		client.setApiKey(API_KEY);
++		client.setBasePath(BASE_URL);
++
++		return client;
++	}
++
++	
++}
+diff --git a/src/main/java/com/infobip/sms/readme.md b/src/main/java/com/infobip/sms/readme.md
+new file mode 100644
+index 0000000..50c7b4e
+--- /dev/null
++++ b/src/main/java/com/infobip/sms/readme.md
+@@ -0,0 +1,25 @@
++## How to Run
++
++Click the "Run" button in the top-right corner.
++
++For your convenience, examples are already pre-populated with your account data like authentication, base URL and phone number.
++
++## Variables
++
++BASE_URL : Infobip data center you are using for API traffic. Please visit API documentation Get started page for more info on personalized Base URL.
++
++API_KEY : Authentication method. Please visit API documentation Get started page for other authentication options.
++
++SENDER : Sender ID that will be displayed on the recipients device as a message sender. Note that
++during the trial period you can use only our default sender. Actual sender may be different depending
++on country and network. Learn more here: https://www.infobip.com/docs/sms/sms-tips-tricks
++
++RECIPIENT : Message recipient phone number. Note that during the trial you can send messages only to your registered phone number.
++     
++MESSAGE_TEXT : Text of the message that will appear on the recipient's device.
++
++## Links
++
++[API Reference](https://www.infobip.com/docs/api)
++
++[Java Client for Infobip API](https://github.com/infobip/infobip-api-java-client)
+diff --git a/src/main/java/com/sweetNet/controller/MemberController.java b/src/main/java/com/sweetNet/controller/MemberController.java
+index 1a53bdf..4c6f755 100644
+--- a/src/main/java/com/sweetNet/controller/MemberController.java
++++ b/src/main/java/com/sweetNet/controller/MemberController.java
+@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
+ import javax.servlet.http.HttpServletRequest;
+ import javax.servlet.http.HttpServletResponse;
+ 
++import org.jboss.aerogear.security.otp.api.Base32;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.data.domain.Example;
+ import org.springframework.web.bind.annotation.GetMapping;
+@@ -29,6 +30,7 @@ import com.alibaba.fastjson.JSON;
+ import com.alibaba.fastjson.JSONArray;
+ import com.alibaba.fastjson.JSONObject;
+ import com.google.gson.Gson;
++import com.infobip.sms.SendSmsBasic;
+ import com.sweetNet.model.Member;
+ import com.sweetNet.model.MemberImage;
+ import com.sweetNet.repository.MemberImageRepository;
+@@ -39,6 +41,7 @@ import com.sweetNet.until.AesHelper;
+ import com.sweetNet.until.ConfigInfo;
+ import com.sweetNet.until.GetLocalJSON;
+ import com.sweetNet.until.JwtTokenUtils;
++import com.sweetNet.until.PhoneUtil;
+ import com.sweetNet.until.Until;
+ 
+ import io.swagger.annotations.Api;
+@@ -276,7 +279,7 @@ public class MemberController {
+ 
+ 				List<MemberImage> memberImageList = memberImageRepository.findByMemUuid(memUuid);
+ 				result.put("imagesData", memberImageList);
+-				
++
+ 				states = ConfigInfo.DATA_OK;
+ 				msg = "success";
+ 			}
+@@ -433,4 +436,82 @@ public class MemberController {
+ 		return jsonArray;
+ 	}
+ 
++	@ApiOperation("發送OTP簡訊")
++	@PostMapping(value = "/sendSMS")
++	public JSONObject sendSMS(@RequestHeader("Authorization") String au, @RequestBody HashMap<String, String> user) {
++		JSONObject result = new JSONObject();
++		String token = au.substring(7);
++		String msg = "success";
++		String states = ConfigInfo.DATA_OK;
++
++		try {
++
++			String memUuid = JwtTokenUtils.getJwtMemUuid(token);
++			tokenCheck = JwtTokenUtils.validateToken(token);
++
++			if (tokenCheck) {
++				PhoneUtil pu = new PhoneUtil();
++				String phoneNumber = user.get("phoneNumber");
++				String recipient = pu.checkPhone(phoneNumber);
++				String secret = Base32.random();
++				String OTP = pu.creatOTP(secret);
++				String messageText = String.valueOf(OTP);
++
++				SendSmsBasic ssb = new SendSmsBasic();
++				ssb.sendSMS(recipient, messageText);
++
++				result.put("secret", secret);
++				result.put("OTP", OTP);
++			}
++
++		} catch (Exception e) {
++			e.printStackTrace();
++			states = ConfigInfo.DATA_FAIL;
++			msg = "error";
++		}
++		result.put("states", states);
++		result.put("msg", msg);
++		return result;
++	}
++
++	@ApiOperation("驗證OTP簡訊")
++	@PostMapping(value = "/verifyOTP")
++	public JSONObject verifyOTP(@RequestHeader("Authorization") String au, @RequestBody HashMap<String, String> user) {
++		JSONObject result = new JSONObject();
++		String token = au.substring(7);
++		String msg = "success";
++		String states = ConfigInfo.DATA_OK;
++
++		try {
++			tokenCheck = JwtTokenUtils.validateToken(token);
++			String memUuid = JwtTokenUtils.getJwtMemUuid(token);
++			if (tokenCheck) {
++				PhoneUtil pu = new PhoneUtil();
++				String OTP = user.get("OTP");
++				String secret = user.get("secret");
++				Boolean verifyOTP = pu.verifyOTP(secret, OTP);
++
++				if (verifyOTP) {
++					Member member = new Member();
++					member.setMemUuid(memUuid);
++					Example<Member> memberExample = Example.of(member);
++					member = memberRepository.findOne(memberExample).get();
++
++					member.setPhoneStates(1);;
++					memberService.save(member);
++				}
++				result.put("verifyOTP", verifyOTP);
++
++			}
++
++		} catch (Exception e) {
++			e.printStackTrace();
++			states = ConfigInfo.DATA_FAIL;
++			msg = "error";
++		}
++		result.put("states", states);
++		result.put("msg", msg);
++		return result;
++	}
++
+ }
+\ No newline at end of file
+diff --git a/src/main/java/com/sweetNet/model/Member.java b/src/main/java/com/sweetNet/model/Member.java
+index 52dcc5e..66d7cb6 100644
+--- a/src/main/java/com/sweetNet/model/Member.java
++++ b/src/main/java/com/sweetNet/model/Member.java
+@@ -42,6 +42,9 @@ public class Member implements Serializable {
+ 	@Column(name = "memPhone")
+ 	private String memPhone;
+ 
++	@Column(name = "phoneStates")
++	private Integer phoneStates;
++
+ 	@Column(name = "memBirthday")
+ 	private String memBirthday;
+ 
+@@ -95,8 +98,8 @@ public class Member implements Serializable {
+ 	}
+ 
+ 	public Member(String memUuid, String memMail, String memPwd, String memNickname, String memDep, Integer memSex,
+-			String memName, String memPhone, String memBirthday, String memAddress, String memArea, Integer memAge,
+-			Integer memHeight, Integer memWeight, Integer memEdu, Integer memMarry, Integer memAlcohol,
++			String memName, String memPhone, Integer phoneStates, String memBirthday, String memAddress, String memArea,
++			Integer memAge, Integer memHeight, Integer memWeight, Integer memEdu, Integer memMarry, Integer memAlcohol,
+ 			Integer memSmoke, Integer memIncome, Integer memAssets, Integer memIsvip, String memRdate, Integer memLgd,
+ 			Integer memSta) {
+ 		super();
+@@ -108,6 +111,7 @@ public class Member implements Serializable {
+ 		this.memSex = memSex;
+ 		this.memName = memName;
+ 		this.memPhone = memPhone;
++		this.phoneStates = phoneStates;
+ 		this.memBirthday = memBirthday;
+ 
+ 		this.memAddress = memAddress;
+@@ -201,6 +205,14 @@ public class Member implements Serializable {
+ 		this.memPhone = memPhone;
+ 	}
+ 
++	public Integer getPhoneStates() {
++		return phoneStates;
++	}
++
++	public void setPhoneStates(Integer phoneStates) {
++		this.phoneStates = phoneStates;
++	}
++
+ 	public String getMemBirthday() {
+ 		return memBirthday;
+ 	}
+diff --git a/src/main/java/com/sweetNet/until/PhoneUtil.java b/src/main/java/com/sweetNet/until/PhoneUtil.java
+new file mode 100644
+index 0000000..3aa6848
+--- /dev/null
++++ b/src/main/java/com/sweetNet/until/PhoneUtil.java
+@@ -0,0 +1,80 @@
++package com.sweetNet.until;
++
++import org.jboss.aerogear.security.otp.Totp;
++
++import com.google.i18n.phonenumbers.NumberParseException;
++import com.google.i18n.phonenumbers.PhoneNumberUtil;
++import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
++import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
++
++public class PhoneUtil {
++	/* 驗證手機國碼 */
++	public String checkPhone(String phoneNumber) {
++		PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
++		PhoneNumber swissNumberProto = new PhoneNumber();
++		try {
++			swissNumberProto = phoneUtil.parse(phoneNumber, "TW");
++
++			String phone = phoneUtil.format(swissNumberProto, PhoneNumberFormat.E164);
++			System.out.println(phone);
++		} catch (NumberParseException e) {
++			System.err.println("NumberParseException was thrown: " + e.toString());
++		}
++		return phoneUtil.format(swissNumberProto, PhoneNumberFormat.E164);
++	}
++
++	public String creatOTP(String secret) {
++		Totp totp = new Totp(secret);
++		return totp.now();
++	}
++
++	public Boolean verifyOTP(String secret, String OTP) {
++		Totp totp = new Totp(secret);
++		return totp.verify(OTP);
++	}
++
++//
++//	private int generate(String secret, long interval) {
++//		return hash(secret, interval);
++//	}
++//
++//	private int hash(String secret, long interval) {
++//		byte[] hash = new byte[0];
++//		try {
++//			// Base32 encoding is just a requirement for google authenticator. We can remove
++//			// it on the next releases.
++//			hash = new Hmac(Hash.SHA1, Base32.decode(secret), interval).digest();
++//		} catch (NoSuchAlgorithmException e) {
++//			e.printStackTrace();
++//		} catch (InvalidKeyException e) {
++//			e.printStackTrace();
++//		} catch (Base32.DecodingException e) {
++//			e.printStackTrace();
++//		}
++//		return bytesToInt(hash);
++//	}
++//
++//	private int bytesToInt(byte[] hash) {
++//		// put selected bytes into result int
++//		int offset = hash[hash.length - 1] & 0xf;
++//
++//		int binary = ((hash[offset] & 0x7f) << 24) | ((hash[offset + 1] & 0xff) << 16)
++//				| ((hash[offset + 2] & 0xff) << 8) | (hash[offset + 3] & 0xff);
++//
++//		return binary % Digits.SIX.getValue();
++//	}
++//
++//	/**
++//	 * Retrieves the current OTP
++//	 *
++//	 * @return OTP
++//	 */
++//	public String now() {
++//		return leftPadding(hash(secret, Clock.getCurrentInterval()));
++//	}
++//
++//	private String leftPadding(int otp) {
++//		return String.format("%06d", otp);
++//	}
++
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/sweetNet/until/PropUtil.java b/src/main/java/com/sweetNet/until/PropUtil.java
+index a15e941..1a43893 100644
+--- a/src/main/java/com/sweetNet/until/PropUtil.java
++++ b/src/main/java/com/sweetNet/until/PropUtil.java
+@@ -5,42 +5,24 @@ import java.io.InputStream;
+ import java.util.Properties;
+ 
+ public class PropUtil {
+-	
+-	  static InputStream input = null;
+-	  
+-	  public static Properties getProperty(String fileName)
+-	  {
+-	    Properties prop = new Properties();
+-	    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+-	    try
+-	    {
+-	    	
+-//            InputStream is = new BufferedInputStream(new FileInputStream(getPath() + fileName));
+-//            BufferedReader bf = new BufferedReader(new  InputStreamReader(is,"UTF-8"));
+-//            prop.load(bf);
+-//	    	
+-//	    	bf.close();
+-//	    	is.close();
+-//	    	
+-//	    	
+-//	      input = null;
+-//	      input = loader.getResourceAsStream(fileName);
+-//	      prop.load(input);
+-//	      
+-//	      input.close();
+-	    	
+-	    	prop.load(new FileInputStream(fileName));
+-	    	
+-	    }
+-	    catch (Exception e)
+-	    {
+-	      e.printStackTrace();
+-	    }
+-	    return prop;
+-	  }
+-	  
+-	    public static String getPath() {
+-	        return Thread.currentThread().getContextClassLoader().getResource("").getPath();
+-	    }
+-	
++
++	static InputStream input = null;
++
++	public static Properties getProperty(String fileName) {
++		Properties prop = new Properties();
++		ClassLoader loader = Thread.currentThread().getContextClassLoader();
++		try {
++
++			prop.load(new FileInputStream(fileName));
++
++		} catch (Exception e) {
++			e.printStackTrace();
++		}
++		return prop;
++	}
++
++	public static String getPath() {
++		return Thread.currentThread().getContextClassLoader().getResource("").getPath();
++	}
++
+ }
+diff --git a/src/main/java/com/sweetNet/until/Until.java b/src/main/java/com/sweetNet/until/Until.java
+index 5991de3..c4a9235 100644
+--- a/src/main/java/com/sweetNet/until/Until.java
++++ b/src/main/java/com/sweetNet/until/Until.java
+@@ -138,5 +138,6 @@ public class Until {
+ 				RECIPIENT, MESSAGE_TEXT);
+ 
+ 	}
+-
++	
++	
+ }
+diff --git a/src/main/java/com/sweetNet/until/test.java b/src/main/java/com/sweetNet/until/test.java
+deleted file mode 100644
+index e9907a0..0000000
+--- a/src/main/java/com/sweetNet/until/test.java
++++ /dev/null
+@@ -1,206 +0,0 @@
+-package com.sweetNet.until;
+-
+-import java.io.BufferedReader;
+-import java.io.IOException;
+-import java.io.InputStream;
+-import java.io.InputStreamReader;
+-import java.io.OutputStreamWriter;
+-import java.io.UnsupportedEncodingException;
+-import java.net.MalformedURLException;
+-import java.net.URL;
+-import java.net.URLConnection;
+-import java.util.HashMap;
+-import java.util.Iterator;
+-import java.util.Map;
+-
+-/**
+- * @ClassName: ApiDemo
+- * @Description: TODO
+- *
+- */
+-public class test {
+-
+-	/**
+-	 * 簡訊提供商開設賬號時提供一下引數:
+-	 * 
+-	 * 賬號、密碼、通訊key、IP、埠
+-	 */
+-	static String account = "你的賬號";
+-	static String password = "你的密碼";
+-	static String veryCode = "通訊key";
+-	static String http_url = "172.26.64.1";
+-
+-	public static String vcode = createRandomVcode();
+-	/**
+-	 * 預設字元編碼集
+-	 */
+-	public static final String CHARSET_UTF8 = "UTF-8";
+-
+-	public static String createRandomVcode() {
+-		// 驗證碼
+-		StringBuffer buffer = new StringBuffer();
+-		for (int i = 0; i < 4; i++) {
+-			buffer.append((int) (Math.random() * 9));
+-		}
+-		return buffer.toString();
+-	}
+-
+-	/**
+-	 * 查詢賬號餘額
+-	 * 
+-	 * @return 賬號餘額，乘以10為簡訊條數 String xml字串，格式請參考文件說明
+-	 */
+-	public static String getBalance() {
+-		String balanceUrl = http_url + "/service/httpService/httpInterface.do?method=getAmount";
+-		Map<String, String> params = new HashMap<String, String>();
+-		params.put("username", account);
+-		params.put("password", password);
+-		params.put("veryCode", veryCode);
+-		String result = sendHttpPost(balanceUrl, params);
+-		return result;
+-	}
+-
+-	/**
+-	 * 傳送普通簡訊 普通簡訊傳送需要人工稽核 請求地址：
+-	 * UTF-8編碼：/service/httpService/httpInterface.do?method=sendUtf8Msg
+-	 * GBK編碼：/service/httpService/httpInterface.do?method=sendGbkMsg
+-	 * 
+-	 * @param mobile  手機號碼, 多個號碼以英文逗號隔開,最多支援100個號碼
+-	 * @param content 簡訊內容
+-	 * @return String xml字串，格式請參考文件說明
+-	 */
+-	public static String sendSms(String mobile, String content) {
+-		String sendSmsUrl = http_url + "/service/httpService/httpInterface.do?method=sendMsg";
+-		Map<String, String> params = new HashMap<String, String>();
+-		params.put("username", account);
+-		params.put("password", password);
+-		params.put("veryCode", veryCode);
+-		params.put("mobile", mobile);
+-		params.put("content", content);
+-		params.put("msgtype", "1");
+-		params.put("code", "utf-8");
+-		String result = sendHttpPost(sendSmsUrl, params);
+-		return result;
+-	}
+-
+-	/**
+-	 * 模版簡訊,無需人工稽核，直接傳送 (簡訊模版的建立參考客戶端操作手冊)
+-	 * 模版：@1@會員，動態驗證碼@2@(五分鐘內有效)。請注意保密，勿將驗證碼告知他人。 引數值:@1@=某某,@2@=4293
+-	 * 手機接收內容：【簡訊簽名】某某會員，動態驗證碼4293(五分鐘內有效)。請注意保密，勿將驗證碼告知他人。
+-	 * 
+-	 * 請求地址： UTF-8編碼：/service/httpService/httpInterface.do?method=sendUtf8Msg
+-	 * GBK編碼：/service/httpService/httpInterface.do?method=sendGbkMsg 注意：
+-	 * 1.傳送模板簡訊變數值不能包含英文逗號和等號（, =） 2.特殊字元進行轉義: + %2b 空格 %20 & %26 % %25
+-	 * 
+-	 * @param mobile  手機號碼
+-	 * @param tplId   模板編號，對應客戶端模版編號
+-	 * @param content 模板引數值，以英文逗號隔開，如：@1@=某某,@2@=4293
+-	 * @return xml字串，格式請參考文件說明
+-	 */
+-	public static String sendTplSms(String mobile, String tplId, String content) {
+-		String sendTplSmsUrl = http_url + "/service/httpService/httpInterface.do?method=sendUtf8Msg";
+-		Map<String, String> params = new HashMap<String, String>();
+-		params.put("username", account);
+-		params.put("password", password);
+-		params.put("veryCode", veryCode);
+-		params.put("mobile", mobile);
+-		params.put("content", content); // 變數值，以英文逗號隔開
+-		params.put("msgtype", "2"); // 2-模板簡訊
+-		params.put("tempid", tplId); // 模板編號
+-		params.put("code", "utf-8");
+-		String result = sendHttpPost(sendTplSmsUrl, params);
+-		return result;
+-	}
+-
+-	/***
+-	 * 查詢下發簡訊的狀態報告
+-	 * 
+-	 * @return String xml字串，格式請參考文件說明
+-	 */
+-	public static String queryReport() {
+-		String reportUrl = http_url + "/service/httpService/httpInterface.do?method=queryReport";
+-		Map<String, String> params = new HashMap<String, String>();
+-		params.put("username", account);
+-		params.put("password", password);
+-		params.put("veryCode", veryCode);
+-		String result = sendHttpPost(reportUrl, params);
+-
+-		return result;
+-	}
+-
+-	/**
+-	 * 查詢上行回覆簡訊
+-	 * 
+-	 * @return String xml字串，格式請參考文件說明
+-	 */
+-	public static String queryMo() {
+-		String moUrl = http_url + "/service/httpService/httpInterface.do?method=queryMo";
+-		Map<String, String> params = new HashMap<String, String>();
+-		params.put("username", account);
+-		params.put("password", password);
+-		params.put("veryCode", veryCode);
+-		String result = sendHttpPost(moUrl, params);
+-		return result;
+-	}
+-
+-	/***
+-	 * 
+-	 * @param apiUrl    介面請求地址
+-	 * @param paramsMap 請求引數集合
+-	 * @return xml字串，格式請參考文件說明 String
+-	 */
+-	private static String sendHttpPost(String apiUrl, Map<String, String> paramsMap) {
+-		String responseText = "";
+-		StringBuilder params = new StringBuilder();
+-		Iterator<Map.Entry<String, String>> iterator = paramsMap.entrySet().iterator();
+-		while (iterator.hasNext()) {
+-			Map.Entry<String, String> entry = iterator.next();
+-			params.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
+-		}
+-
+-		try {
+-			URL url = new URL(apiUrl);
+-			URLConnection connection = url.openConnection();
+-			connection.setDoOutput(true);
+-			OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream(), CHARSET_UTF8);
+-			out.write(params.toString()); // post的關鍵所在！
+-			out.flush();
+-			out.close();
+-			// 讀取響應返回值
+-			InputStream is = connection.getInputStream();
+-			BufferedReader br = new BufferedReader(new InputStreamReader(is, CHARSET_UTF8));
+-			String temp = "";
+-			while ((temp = br.readLine()) != null) {
+-				responseText += temp;
+-			}
+-		} catch (MalformedURLException e) {
+-			e.printStackTrace();
+-		} catch (UnsupportedEncodingException e) {
+-			e.printStackTrace();
+-		} catch (IOException e) {
+-			e.printStackTrace();
+-		}
+-		return responseText;
+-	}
+-
+-	/**
+-	 * @param args
+-	 */
+-	public static void main(String[] args) throws Exception {
+-//		 查詢賬號餘額
+-		 System.out.println(getBalance());
+-
+-		// 傳送普通簡訊，修改接收簡訊的手機號碼及簡訊內容,多個號碼以英文逗號隔開，最多支援100個號碼
+-		// System.out.println(sendSms("159*******1,159*******2",
+-		// "您的驗證碼是8888,請注意保密，勿將驗證碼告知他人。"));
+-
+-		// System.out.println(sendTplSms("這裡是你的手機號碼","你的模板的編號","引數=value"));
+-
+-		// 查詢下發簡訊的狀態報告
+-//      System.out.println(queryReport());
+-
+-		// 查詢上行回覆簡訊
+-		// System.out.println(queryMo());
+-	}
+-
+-}
+\ No newline at end of file
+diff --git a/target/classes/META-INF/maven/com.example/sweetNet/pom.properties b/target/classes/META-INF/maven/com.example/sweetNet/pom.properties
+index 2ac646b..1ed74bb 100644
+--- a/target/classes/META-INF/maven/com.example/sweetNet/pom.properties
++++ b/target/classes/META-INF/maven/com.example/sweetNet/pom.properties
+@@ -1,5 +1,5 @@
+ #Generated by Maven Integration for Eclipse
+-#Sun May 29 12:42:53 CST 2022
++#Mon Jun 06 20:52:50 CST 2022
+ version=0.0.1-SNAPSHOT
+ groupId=com.example
+ m2e.projectName=sweetNet
+diff --git a/target/classes/META-INF/maven/com.example/sweetNet/pom.xml b/target/classes/META-INF/maven/com.example/sweetNet/pom.xml
+index 7e13532..f1345c5 100644
+--- a/target/classes/META-INF/maven/com.example/sweetNet/pom.xml
++++ b/target/classes/META-INF/maven/com.example/sweetNet/pom.xml
+@@ -1,7 +1,7 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project xmlns="http://maven.apache.org/POM/4.0.0"
+ 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
++	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+ 	<modelVersion>4.0.0</modelVersion>
+ 	<parent>
+ 		<groupId>org.springframework.boot</groupId>
+@@ -104,6 +104,35 @@
+ 			<artifactId>httpcore</artifactId>
+ 			<version>4.4.1</version>
+ 		</dependency>
++
++		<dependency>
++			<groupId>com.sun.mail</groupId>
++			<artifactId>javax.mail</artifactId>
++			<version>1.6.2</version>
++		</dependency>
++
++		<dependency>
++			<groupId>com.infobip</groupId>
++			<artifactId>infobip-api-java-client</artifactId>
++			<version>3.2.0</version>
++		</dependency>
++
++
++		<!-- 电话号码工具类 -->
++		<dependency>
++			<groupId>com.googlecode.libphonenumber</groupId>
++			<artifactId>geocoder</artifactId>
++			<version>2.12</version>
++		</dependency>
++		<!-- 电话号码工具类 END -->
++
++		<!-- https://mvnrepository.com/artifact/org.jboss.aerogear/aerogear-otp-java -->
++		<dependency>
++			<groupId>org.jboss.aerogear</groupId>
++			<artifactId>aerogear-otp-java</artifactId>
++			<version>1.0.0</version>
++		</dependency>
++
+ 	</dependencies>
+ 
+ 
+@@ -114,7 +143,7 @@
+ 				<groupId>org.springframework.boot</groupId>
+ 				<artifactId>spring-boot-maven-plugin</artifactId>
+ 			</plugin>
+-			
++
+ 			<plugin>
+ 				<groupId>com.spotify</groupId>
+ 				<artifactId>dockerfile-maven-plugin</artifactId>
+diff --git a/target/classes/com/infobip/sms/SendSmsBasic.class b/target/classes/com/infobip/sms/SendSmsBasic.class
+new file mode 100644
+index 0000000..f36350e
+Binary files /dev/null and b/target/classes/com/infobip/sms/SendSmsBasic.class differ
+diff --git a/target/classes/com/infobip/sms/SendSmsLib.class b/target/classes/com/infobip/sms/SendSmsLib.class
+new file mode 100644
+index 0000000..2ed9a61
+Binary files /dev/null and b/target/classes/com/infobip/sms/SendSmsLib.class differ
+diff --git a/target/classes/com/infobip/sms/readme.md b/target/classes/com/infobip/sms/readme.md
+new file mode 100644
+index 0000000..50c7b4e
+--- /dev/null
++++ b/target/classes/com/infobip/sms/readme.md
+@@ -0,0 +1,25 @@
++## How to Run
++
++Click the "Run" button in the top-right corner.
++
++For your convenience, examples are already pre-populated with your account data like authentication, base URL and phone number.
++
++## Variables
++
++BASE_URL : Infobip data center you are using for API traffic. Please visit API documentation Get started page for more info on personalized Base URL.
++
++API_KEY : Authentication method. Please visit API documentation Get started page for other authentication options.
++
++SENDER : Sender ID that will be displayed on the recipients device as a message sender. Note that
++during the trial period you can use only our default sender. Actual sender may be different depending
++on country and network. Learn more here: https://www.infobip.com/docs/sms/sms-tips-tricks
++
++RECIPIENT : Message recipient phone number. Note that during the trial you can send messages only to your registered phone number.
++     
++MESSAGE_TEXT : Text of the message that will appear on the recipient's device.
++
++## Links
++
++[API Reference](https://www.infobip.com/docs/api)
++
++[Java Client for Infobip API](https://github.com/infobip/infobip-api-java-client)
+diff --git a/target/classes/com/sweetNet/controller/MemberController.class b/target/classes/com/sweetNet/controller/MemberController.class
+index 26c0f29..3c9b6dc 100644
+Binary files a/target/classes/com/sweetNet/controller/MemberController.class and b/target/classes/com/sweetNet/controller/MemberController.class differ
+diff --git a/target/classes/com/sweetNet/model/Member.class b/target/classes/com/sweetNet/model/Member.class
+index 37210ca..08f91fa 100644
+Binary files a/target/classes/com/sweetNet/model/Member.class and b/target/classes/com/sweetNet/model/Member.class differ
+diff --git a/target/classes/com/sweetNet/until/PhoneUtil.class b/target/classes/com/sweetNet/until/PhoneUtil.class
+new file mode 100644
+index 0000000..e629130
+Binary files /dev/null and b/target/classes/com/sweetNet/until/PhoneUtil.class differ
+diff --git a/target/classes/com/sweetNet/until/PropUtil.class b/target/classes/com/sweetNet/until/PropUtil.class
+index 6cc93a0..22a247f 100644
+Binary files a/target/classes/com/sweetNet/until/PropUtil.class and b/target/classes/com/sweetNet/until/PropUtil.class differ
+diff --git a/target/classes/com/sweetNet/until/test.class b/target/classes/com/sweetNet/until/test.class
+deleted file mode 100644
+index 97d674f..0000000
+Binary files a/target/classes/com/sweetNet/until/test.class and /dev/null differ

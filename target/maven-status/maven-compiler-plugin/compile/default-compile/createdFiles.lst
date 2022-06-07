@@ -10,10 +10,13 @@ com\sweetNet\until\GetGooglePlace.class
 com\sweetNet\until\ConfigInfo.class
 com\sweetNet\service\MessageContentServiceImpl.class
 com\sweetNet\service\MessageService.class
+com\sweetNet\until\PhoneUtil.class
+com\infobip\sms\SendSmsLib.class
 com\sweetNet\model\Message.class
 com\sweetNet\SwaggerConfig.class
 com\sweetNet\service\MemberImageService.class
 com\sweetNet\repository\MemberImageRepository.class
+com\infobip\sms\SendSmsBasic.class
 com\sweetNet\repository\MessageRepository.class
 com\sweetNet\service\MemberServiceImpl.class
 com\sweetNet\service\MemberImageServiceImpl.class
@@ -24,6 +27,7 @@ com\sweetNet\CorsFilter.class
 com\sweetNet\service\MessageServiceImpl.class
 com\sweetNet\service\MessageContentService.class
 com\sweetNet\until\httpPostWithJson.class
+com\sweetNet\until\GetLocalJSON.class
 com\sweetNet\model\Member.class
 com\sweetNet\controller\LoginController.class
 com\sweetNet\until\CashPay.class

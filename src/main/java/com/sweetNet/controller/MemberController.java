@@ -1,6 +1,7 @@
 package com.sweetNet.controller;
 
 import java.io.File;
+import java.security.SignatureException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,6 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import javax.security.auth.message.AuthException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.google.gson.Gson;
 import com.infobip.sms.SendSmsBasic;
 import com.sweetNet.model.Member;
@@ -86,7 +89,7 @@ public class MemberController {
 		List<String> msgList = new ArrayList<String>();
 
 		String states = ConfigInfo.DATA_OK;
-
+		String msg = "failed";
 		String mail_regex = "^\\w{1,63}@[a-zA-Z0-9]{2,63}\\.[a-zA-Z]{2,63}(\\.[a-zA-Z]{2,63})?$";
 		Pattern pattern = Pattern.compile(mail_regex);
 		try {
@@ -139,8 +142,9 @@ public class MemberController {
 			}
 
 		} catch (Exception e) {
-			states = ConfigInfo.DATA_ERR_SYS;
-			msgList.add("系統發生問題");
+			e.printStackTrace();
+			states = ConfigInfo.DATA_FAIL;
+			msg = e.getMessage();
 		}
 
 		JSONObject result = new JSONObject();
@@ -165,7 +169,7 @@ public class MemberController {
 
 		String JWTtoken = JwtTokenUtils.generateToken(user); // 取得token
 		String states = ConfigInfo.DATA_ERR_SYS;
-
+		String msg = "failed";
 		String phone_regex = "(09)+[\\d]{8}";
 		Pattern pattern = Pattern.compile(phone_regex);
 		List<String> msgList = new ArrayList<String>();
@@ -236,9 +240,10 @@ public class MemberController {
 			} else {
 
 			}
-		} catch (Exception e) {
-			states = ConfigInfo.DATA_ERR_SYS;
-			msgList.add("系統發生問題");
+		} catch (TokenExpiredException | AuthException | SignatureException e) {
+			e.printStackTrace();
+			states = ConfigInfo.DATA_FAIL;
+			msg = e.getMessage();
 		}
 
 		JSONObject result = new JSONObject();
@@ -283,8 +288,10 @@ public class MemberController {
 				states = ConfigInfo.DATA_OK;
 				msg = "success";
 			}
-		} catch (Exception e) {
+		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
+			states = ConfigInfo.DATA_FAIL;
+			msg = e.getMessage();
 		}
 
 		result.put("states", states);
@@ -346,10 +353,10 @@ public class MemberController {
 				}
 				result.put("data", jsonArray);
 			}
-		} catch (Exception e) {
+		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
 			states = ConfigInfo.DATA_FAIL;
-			msg = "error";
+			msg = e.getMessage();
 		}
 
 		result.put("states", states);
@@ -411,10 +418,10 @@ public class MemberController {
 				}
 				result.put("data", jsonArray);
 			}
-		} catch (Exception e) {
+		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
 			states = ConfigInfo.DATA_FAIL;
-			msg = "error";
+			msg = e.getMessage();
 		}
 
 		result.put("states", states);
@@ -437,7 +444,7 @@ public class MemberController {
 	}
 
 	@ApiOperation("發送OTP簡訊")
-	@PostMapping(value = "/sendSMS")
+	@PostMapping(value = "/OTP/sendOTP")
 	public JSONObject sendSMS(@RequestHeader("Authorization") String au, @RequestBody HashMap<String, String> user) {
 		JSONObject result = new JSONObject();
 		String token = au.substring(7);
@@ -464,10 +471,10 @@ public class MemberController {
 				result.put("OTP", OTP);
 			}
 
-		} catch (Exception e) {
+		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
 			states = ConfigInfo.DATA_FAIL;
-			msg = "error";
+			msg = e.getMessage();
 		}
 		result.put("states", states);
 		result.put("msg", msg);
@@ -475,7 +482,7 @@ public class MemberController {
 	}
 
 	@ApiOperation("驗證OTP簡訊")
-	@PostMapping(value = "/verifyOTP")
+	@PostMapping(value = "/OTP/verifyOTP")
 	public JSONObject verifyOTP(@RequestHeader("Authorization") String au, @RequestBody HashMap<String, String> user) {
 		JSONObject result = new JSONObject();
 		String token = au.substring(7);
@@ -497,18 +504,20 @@ public class MemberController {
 					Example<Member> memberExample = Example.of(member);
 					member = memberRepository.findOne(memberExample).get();
 
-					member.setPhoneStates(1);;
+					member.setPhoneStates(1);
+					;
 					memberService.save(member);
 				}
 				result.put("verifyOTP", verifyOTP);
 
 			}
 
-		} catch (Exception e) {
+		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
 			states = ConfigInfo.DATA_FAIL;
-			msg = "error";
+			msg = e.getMessage();
 		}
+
 		result.put("states", states);
 		result.put("msg", msg);
 		return result;
