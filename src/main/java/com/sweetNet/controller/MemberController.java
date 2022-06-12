@@ -1,6 +1,5 @@
 package com.sweetNet.controller;
 
-import java.io.File;
 import java.security.SignatureException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,15 +33,16 @@ import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.google.gson.Gson;
 import com.infobip.sms.SendSmsBasic;
+import com.sweetNet.model.City;
 import com.sweetNet.model.Member;
 import com.sweetNet.model.MemberImage;
 import com.sweetNet.repository.MemberImageRepository;
 import com.sweetNet.repository.MemberRepository;
+import com.sweetNet.service.CityService;
 import com.sweetNet.service.MemberImageService;
 import com.sweetNet.service.MemberService;
 import com.sweetNet.until.AesHelper;
 import com.sweetNet.until.ConfigInfo;
-import com.sweetNet.until.GetLocalJSON;
 import com.sweetNet.until.JwtTokenUtils;
 import com.sweetNet.until.PhoneUtil;
 import com.sweetNet.until.Until;
@@ -71,6 +71,8 @@ public class MemberController {
 	@Autowired
 	private MemberImageRepository memberImageRepository;
 
+	@Autowired
+	private CityService cityService;
 	private static Boolean tokenCheck = false;
 
 	/**
@@ -434,8 +436,14 @@ public class MemberController {
 	public JSONArray getCountry() {
 		JSONArray jsonArray = new JSONArray();
 		try {
-			File file = new File("country.json");
-			jsonArray = GetLocalJSON.getCityJSON();
+
+			Iterable<City> citys = cityService.findAll();
+			for (City c : citys) {
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("city", c.getCity());
+				jsonObject.put("cityId", c.getCityId());
+				jsonArray.add(jsonObject);
+			}
 			System.out.println(jsonArray);
 		} catch (Exception e) {
 			e.printStackTrace();
