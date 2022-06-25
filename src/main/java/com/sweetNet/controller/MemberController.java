@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -21,17 +22,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.google.gson.Gson;
 import com.infobip.sms.SendSmsBasic;
 import com.sweetNet.dto.CityDTO;
 import com.sweetNet.dto.MemberDTO;
 import com.sweetNet.dto.MemberInfoDTO;
+import com.sweetNet.dto.PhoneOtpDTO;
 import com.sweetNet.dto.SignUpDTO;
 import com.sweetNet.model.Member;
 import com.sweetNet.model.MemberImage;
@@ -47,7 +48,6 @@ import com.sweetNet.until.SystemInfo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 
 /**
  * @author Paul
@@ -68,7 +68,6 @@ public class MemberController {
 	private MemberImageService memberImageService;
 	@Autowired
 	private MemberImageRepository memberImageRepository;
-
 	@Autowired
 	private CityService cityService;
 	private static Boolean tokenCheck = false;
@@ -144,17 +143,14 @@ public class MemberController {
 	 */
 	@ApiOperation("填寫會員資料")
 	@PutMapping(value = "/user")
-	public JSONObject createAccountInfo(@RequestHeader("Authorization") String au,
-			@ApiParam("UUID：memUuid、姓名：memName、電話：memPhone、生日(YYYY/MM/DD)：memBirthday、地址:memAddress、縣市區域：memArea、年齡：memAge、身高：memHeight、"
-					+ "體重：memWeight、教育程度(1：高中、2：二專五專、3：學士、4：碩士、5:博士、)：memEdu、婚姻狀況(1未婚2已婚)：memMarry、飲酒習慣(1經常2偶爾3從不)：memAlcohol、吸菸習慣(1經常2偶爾3從不)：memSmoke、年收入：memIncome、"
-					+ "資產(萬)：memAssets、VIP狀態(0：一般、1：VIP):memIsvip") MemberInfoDTO memberInfoDTO) {
+	public String createAccountInfo(@RequestHeader("Authorization") String au, MemberInfoDTO memberInfoDTO) {
+
 		String token = au.substring(7);
 		String memUuid = JwtTokenUtils.getJwtMemUuid(token); // 取得token
 
 		String states = SystemInfo.DATA_ERR_SYS;
 		String msg = "";
-		String phone_regex = "(09)+[\\d]{8}";
-		Pattern pattern = Pattern.compile(phone_regex);
+		Pattern pattern = Pattern.compile(SystemInfo.PHONE_REGEX);
 		try {
 
 			tokenCheck = JwtTokenUtils.validateToken(token);
@@ -190,11 +186,19 @@ public class MemberController {
 
 				if (("").equals(memPhone) || !pattern.matcher(memPhone).find()) {
 					states = SystemInfo.DATA_FAIL;
-					msg = "請輸入正確手機號碼";
+					msg = SystemInfo.ERROR_PHONE;
 				}
 				Member member = new Member();
 				member.setMemUuid(memUuid);
 				MemberDTO memberDTO = memberService.findOneByUuid(memUuid);
+
+				member.setMemPwd(memberDTO.getMemPwd());
+				member.setMemMail(memberDTO.getMemMail());
+				member.setMemPhone(memberDTO.getMemPhone());
+				member.setMemSex(memberDTO.getMemSex());
+				member.setMemDep(memberDTO.getMemDep());
+				member.setMemLgd(memberDTO.getMemLgd());
+				member.setPhoneStates(memberDTO.getPhoneStates());
 
 				member.setMemUuid(memUuid);
 				member.setMemName(memName);
@@ -217,7 +221,7 @@ public class MemberController {
 				member.setMemSta(memSta);
 				memberService.save(member);
 				states = SystemInfo.DATA_OK;
-				msg = "Insert Success";
+				msg = SystemInfo.SYS_MESSAGE_SUCCESS;
 			} else {
 
 			}
@@ -227,11 +231,13 @@ public class MemberController {
 			msg = e.getMessage();
 		}
 
-		JSONObject result = new JSONObject();
-		result.put("states", states);
-		result.put("msg", msg);
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("states", states);
+		map.put("msg", msg);
 
-		return result;
+		Gson gson = new Gson();
+
+		return gson.toJson(map);
 	}
 
 	/**
@@ -371,30 +377,28 @@ public class MemberController {
 
 	@ApiOperation("發送OTP簡訊")
 	@PostMapping(value = "/OTP/sendOTP")
-	public JSONObject sendSMS(@RequestHeader("Authorization") String au, @RequestBody HashMap<String, String> user) {
-		JSONObject result = new JSONObject();
+	public String sendSMS(@RequestHeader("Authorization") String au, PhoneOtpDTO phoneOtpDTO) {
+		Gson gson = new Gson();
+		Map<String, String> map = new HashMap<String, String>();
+
 		String token = au.substring(7);
-		String msg = "success";
+		String msg = SystemInfo.SYS_MESSAGE_SUCCESS;
 		String states = SystemInfo.DATA_OK;
 
 		try {
 
-			String memUuid = JwtTokenUtils.getJwtMemUuid(token);
 			tokenCheck = JwtTokenUtils.validateToken(token);
 
 			if (tokenCheck) {
 				PhoneUtil pu = new PhoneUtil();
-				String phoneNumber = user.get("phoneNumber");
-				String recipient = pu.checkPhone(phoneNumber);
+				String recipient = pu.checkPhone(phoneOtpDTO.getMemPhone());
 				String secret = Base32.random();
 				String OTP = pu.creatOTP(secret);
-				String messageText = String.valueOf(OTP);
 
-				SendSmsBasic ssb = new SendSmsBasic();
-				ssb.sendSMS(recipient, messageText);
+				SendSmsBasic.sendSMS(recipient, this.OTPMsg(OTP));
 
-				result.put("secret", secret);
-				result.put("OTP", OTP);
+				map.put("OTP", OTP);
+				map.put("secret", secret);
 			}
 
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
@@ -402,17 +406,21 @@ public class MemberController {
 			states = SystemInfo.DATA_FAIL;
 			msg = e.getMessage();
 		}
-		result.put("states", states);
-		result.put("msg", msg);
-		return result;
+
+		map.put("states", states);
+		map.put("msg", msg);
+
+		return gson.toJson(map);
 	}
 
 	@ApiOperation("驗證OTP簡訊")
 	@PostMapping(value = "/OTP/verifyOTP")
-	public JSONObject verifyOTP(@RequestHeader("Authorization") String au, @RequestBody HashMap<String, String> user) {
-		JSONObject result = new JSONObject();
+	public String verifyOTP(@RequestHeader("Authorization") String au, PhoneOtpDTO phoneOtpDTO) {
+		Gson gson = new Gson();
+		Map<String, String> map = new HashMap<String, String>();
+
 		String token = au.substring(7);
-		String msg = "success";
+		String msg = SystemInfo.SYS_MESSAGE_SUCCESS;
 		String states = SystemInfo.DATA_OK;
 
 		try {
@@ -420,8 +428,8 @@ public class MemberController {
 			String memUuid = JwtTokenUtils.getJwtMemUuid(token);
 			if (tokenCheck) {
 				PhoneUtil pu = new PhoneUtil();
-				String OTP = user.get("OTP");
-				String secret = user.get("secret");
+				String OTP = phoneOtpDTO.getOtp();
+				String secret = phoneOtpDTO.getSecret();
 				Boolean verifyOTP = pu.verifyOTP(secret, OTP);
 
 				if (verifyOTP) {
@@ -431,10 +439,9 @@ public class MemberController {
 					member = memberRepository.findOne(memberExample).get();
 
 					member.setPhoneStates(1);
-					;
 					memberService.save(member);
 				}
-				result.put("verifyOTP", verifyOTP);
+				map.put("verifyOTP", String.valueOf(verifyOTP));
 
 			}
 
@@ -444,9 +451,21 @@ public class MemberController {
 			msg = e.getMessage();
 		}
 
-		result.put("states", states);
-		result.put("msg", msg);
-		return result;
+		map.put("states", states);
+		map.put("msg", msg);
+		return gson.toJson(map);
+	}
+
+	public Map<String, String> resultMap(String msg, String states) {
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("msg", msg);
+		map.put("states", states);
+		return map;
+	}
+
+	public String OTPMsg(String otp) {
+		String otpMessage = "您的OTP驗證碼： " + otp + " 請於60秒內輸入驗證";
+		return otpMessage;
 	}
 
 }

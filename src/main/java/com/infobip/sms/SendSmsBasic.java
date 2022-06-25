@@ -70,7 +70,6 @@ public class SendSmsBasic {
 
 			response = client.newCall(request).execute();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

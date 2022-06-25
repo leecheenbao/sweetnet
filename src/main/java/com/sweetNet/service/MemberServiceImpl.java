@@ -104,6 +104,7 @@ public class MemberServiceImpl implements MemberService {
 		member.setMemSta(memberDTO.getMemSta());
 		member.setMemUuid(memberDTO.getMemUuid());
 		member.setMemWeight(memberDTO.getMemWeight());
+
 		return member;
 	}
 
@@ -132,6 +133,9 @@ public class MemberServiceImpl implements MemberService {
 		memberDTO.setMemSta(member.getMemSta());
 		memberDTO.setMemUuid(member.getMemUuid());
 		memberDTO.setMemWeight(member.getMemWeight());
+
+		memberDTO.setPhoneStates(member.getPhoneStates());
+		memberDTO.setMemPwd(member.getMemPwd());
 		return memberDTO;
 	}
 
