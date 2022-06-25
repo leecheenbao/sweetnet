@@ -4,11 +4,19 @@ import java.io.Serializable;
 
 import com.alibaba.fastjson.JSONObject;
 
-public class MemberInfoDTO implements Serializable {
+public class MemberDTO implements Serializable {
+
+	private String memUuid;
+
+	private String memMail;
+
+	private String memPwd;
 
 	private String memNickname;
 
 	private String memDep;
+
+	private Integer memSex;
 
 	private String memName;
 
@@ -42,18 +50,27 @@ public class MemberInfoDTO implements Serializable {
 
 	private Integer memIsvip;
 
-	public MemberInfoDTO() {
+	private String memRdate;
+
+	private Integer memLgd;
+
+	private Integer memSta;
+
+	public MemberDTO() {
 		super();
 	}
 
-	public MemberInfoDTO(String memMail, String memPwd, String memNickname, String memDep, Integer memSex,
-			String memName, String memPhone, Integer phoneStates, String memBirthday, String memAddress, String memArea,
-			Integer memAge, Integer memHeight, Integer memWeight, Integer memEdu, Integer memMarry, Integer memAlcohol,
+	public MemberDTO(String memMail, String memPwd, String memNickname, String memDep, Integer memSex, String memName,
+			String memPhone, Integer phoneStates, String memBirthday, String memAddress, String memArea, Integer memAge,
+			Integer memHeight, Integer memWeight, Integer memEdu, Integer memMarry, Integer memAlcohol,
 			Integer memSmoke, Integer memIncome, Integer memAssets, Integer memIsvip, String memRdate, Integer memLgd,
 			Integer memSta) {
 		super();
+		this.memMail = memMail;
+		this.memPwd = memPwd;
 		this.memNickname = memNickname;
 		this.memDep = memDep;
+		this.memSex = memSex;
 		this.memName = memName;
 		this.memPhone = memPhone;
 		this.phoneStates = phoneStates;
@@ -73,6 +90,33 @@ public class MemberInfoDTO implements Serializable {
 		this.memAssets = memAssets;
 
 		this.memIsvip = memIsvip;
+		this.memRdate = memRdate;
+		this.memLgd = memLgd;
+		this.memSta = memSta;
+	}
+
+	public String getMemUuid() {
+		return memUuid;
+	}
+
+	public void setMemUuid(String memUuid) {
+		this.memUuid = memUuid;
+	}
+
+	public String getMemMail() {
+		return memMail;
+	}
+
+	public void setMemMail(String memMail) {
+		this.memMail = memMail;
+	}
+
+	public String getMemPwd() {
+		return memPwd;
+	}
+
+	public void setMemPwd(String memPwd) {
+		this.memPwd = memPwd;
 	}
 
 	public String getMemNickname() {
@@ -89,6 +133,14 @@ public class MemberInfoDTO implements Serializable {
 
 	public void setMemDep(String memDep) {
 		this.memDep = memDep;
+	}
+
+	public Integer getMemSex() {
+		return memSex;
+	}
+
+	public void setMemSex(Integer memSex) {
+		this.memSex = memSex;
 	}
 
 	public String getMemName() {
@@ -211,6 +263,30 @@ public class MemberInfoDTO implements Serializable {
 		this.memIsvip = memIsvip;
 	}
 
+	public String getMemRdate() {
+		return memRdate;
+	}
+
+	public void setMemRdate(String memRdate) {
+		this.memRdate = memRdate;
+	}
+
+	public Integer getMemLgd() {
+		return memLgd;
+	}
+
+	public void setMemLgd(Integer memLgd) {
+		this.memLgd = memLgd;
+	}
+
+	public Integer getMemSta() {
+		return memSta;
+	}
+
+	public void setMemSta(Integer memSta) {
+		this.memSta = memSta;
+	}
+
 	public String getMemArea() {
 		return memArea;
 	}
@@ -222,8 +298,11 @@ public class MemberInfoDTO implements Serializable {
 	public JSONObject toJson() {
 		JSONObject json = new JSONObject();
 
+		json.put("memUuid", memUuid);
+		json.put("memMail", memMail);
 		json.put("memNickname", memNickname);
 		json.put("memDep", memDep);
+		json.put("memSex", memSex);
 		json.put("memName", memName);
 		json.put("memPhone", memPhone);
 		json.put("memBirthday", memBirthday);
@@ -239,6 +318,9 @@ public class MemberInfoDTO implements Serializable {
 		json.put("memIncome", memIncome);
 		json.put("memAssets", memAssets);
 		json.put("memIsvip", memIsvip);
+		json.put("memRdate", memRdate);
+		json.put("memLgd", memLgd);
+		json.put("memSta", memSta);
 		return json;
 	}
 

@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sweetNet.dto.MemberInfoDTO;
+import com.sweetNet.dto.MemberDTO;
 import com.sweetNet.model.Member;
 import com.sweetNet.repository.MemberRepository;
 
@@ -17,33 +17,33 @@ public class MemberServiceImpl implements MemberService {
 	private MemberRepository memberRepository;
 
 	@Override
-	public List<MemberInfoDTO> findAll() {
+	public List<MemberDTO> findAll() {
 		List<Member> members = memberRepository.findAll();
-		List<MemberInfoDTO> memberDTOs = new ArrayList<MemberInfoDTO>();
+		List<MemberDTO> memberDTOs = new ArrayList<MemberDTO>();
 		for (Member member : members) {
-			MemberInfoDTO memberDTO = this.getMemberDTOFromMember(member);
+			MemberDTO memberDTO = this.getMemberDTOFromMember(member);
 			memberDTOs.add(memberDTO);
 		}
 		return memberDTOs;
 	}
 
 	@Override
-	public List<MemberInfoDTO> findByMemSex(Integer memSex) {
+	public List<MemberDTO> findByMemSex(Integer memSex) {
 		List<Member> members = memberRepository.findByMemSex(memSex);
-		List<MemberInfoDTO> memberDTOs = new ArrayList<MemberInfoDTO>();
+		List<MemberDTO> memberDTOs = new ArrayList<MemberDTO>();
 		for (Member member : members) {
-			MemberInfoDTO memberDTO = this.getMemberDTOFromMember(member);
+			MemberDTO memberDTO = this.getMemberDTOFromMember(member);
 			memberDTOs.add(memberDTO);
 		}
 		return memberDTOs;
 	}
 
 	@Override
-	public List<MemberInfoDTO> findByMemSexAndMemArea(Integer memSex, String memArea) {
+	public List<MemberDTO> findByMemSexAndMemArea(Integer memSex, String memArea) {
 		List<Member> members = memberRepository.findByMemSexAndMemArea(memSex, memArea);
-		List<MemberInfoDTO> memberDTOs = new ArrayList<MemberInfoDTO>();
+		List<MemberDTO> memberDTOs = new ArrayList<MemberDTO>();
 		for (Member member : members) {
-			MemberInfoDTO memberDTO = this.getMemberDTOFromMember(member);
+			MemberDTO memberDTO = this.getMemberDTOFromMember(member);
 			memberDTOs.add(memberDTO);
 		}
 		return memberDTOs;
@@ -55,8 +55,8 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public MemberInfoDTO findOneByUuid(String memUuid) {
-		MemberInfoDTO memberDTO = new MemberInfoDTO();
+	public MemberDTO findOneByUuid(String memUuid) {
+		MemberDTO memberDTO = new MemberDTO();
 		Member member = new Member();
 
 		Optional<Member> mOptional = memberRepository.findById(memUuid);
@@ -68,8 +68,8 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public MemberInfoDTO findOneByEmail(String memEamil) {
-		MemberInfoDTO memberDTO = new MemberInfoDTO();
+	public MemberDTO findOneByEmail(String memEamil) {
+		MemberDTO memberDTO = new MemberDTO();
 		Member member = memberRepository.findByMemMail(memEamil);
 		if (member != null) {
 
@@ -78,7 +78,7 @@ public class MemberServiceImpl implements MemberService {
 		return memberDTO;
 	}
 
-	public Member getMemberFromMemberDTO(MemberInfoDTO memberDTO) {
+	public Member getMemberFromMemberDTO(MemberDTO memberDTO) {
 		Member member = new Member();
 		member.setMemAddress(memberDTO.getMemAddress());
 		member.setMemAge(memberDTO.getMemAge());
@@ -107,8 +107,8 @@ public class MemberServiceImpl implements MemberService {
 		return member;
 	}
 
-	public MemberInfoDTO getMemberDTOFromMember(Member member) {
-		MemberInfoDTO memberDTO = new MemberInfoDTO();
+	public MemberDTO getMemberDTOFromMember(Member member) {
+		MemberDTO memberDTO = new MemberDTO();
 		memberDTO.setMemAddress(member.getMemAddress());
 		memberDTO.setMemAge(member.getMemAge());
 		memberDTO.setMemAlcohol(member.getMemAlcohol());

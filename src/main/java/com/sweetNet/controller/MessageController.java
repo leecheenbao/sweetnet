@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sweetNet.dto.MemberInfoDTO;
+import com.sweetNet.dto.MemberDTO;
 import com.sweetNet.model.Message;
 import com.sweetNet.model.MessageContent;
 import com.sweetNet.repository.MessageContentRepository;
@@ -81,8 +81,8 @@ public class MessageController {
 					String content = convertBlob(blob);
 					String pdate = mcList.get(index++).getPdate();
 
-					MemberInfoDTO sendMember = memberService.findOneByUuid(sendId);
-					MemberInfoDTO recMember = memberService.findOneByUuid(recId);
+					MemberDTO sendMember = memberService.findOneByUuid(sendId);
+					MemberDTO recMember = memberService.findOneByUuid(recId);
 					String sendNickName = sendMember.getMemNickname();
 					String recNickName = recMember.getMemNickname();
 
@@ -134,8 +134,8 @@ public class MessageController {
 					Blob blob = mc.getContent();
 					String content = convertBlob(blob);
 
-					MemberInfoDTO sendMember = memberService.findOneByUuid(m.getSendId());
-					MemberInfoDTO recMember = memberService.findOneByUuid(recId);
+					MemberDTO sendMember = memberService.findOneByUuid(m.getSendId());
+					MemberDTO recMember = memberService.findOneByUuid(recId);
 					String sendNickName = sendMember.getMemNickname();
 					String recNickName = recMember.getMemNickname();
 
