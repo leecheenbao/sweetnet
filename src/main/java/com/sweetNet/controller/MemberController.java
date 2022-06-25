@@ -7,7 +7,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -27,11 +26,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.google.gson.Gson;
 import com.infobip.sms.SendSmsBasic;
 import com.sweetNet.dto.CityDTO;
 import com.sweetNet.dto.MemberDTO;
@@ -323,12 +319,10 @@ public class MemberController {
 	 */
 	@ApiOperation("顯示會員資料 - 以登入會員的性別分類，男生只能看到女生、女生只能看到男生")
 	@GetMapping(value = "/users")
-	public JSONObject getUserInfoBySex(@RequestHeader("Authorization") String au) {
-		JSONObject result = new JSONObject();
-		String token = au.substring(7);
-		String msg = "success";
-		String states = SystemInfo.DATA_OK;
+	public List<MemberDTO> getUserInfoBySex(@RequestHeader("Authorization") String au) {
 
+		String token = au.substring(7);
+		List<MemberDTO> memberDTOs = new ArrayList<MemberDTO>();
 		try {
 
 			String memUuid = JwtTokenUtils.getJwtMemUuid(token);
@@ -338,46 +332,28 @@ public class MemberController {
 
 				Member member = new Member();
 				member.setMemUuid(memUuid);
-				Example<Member> example = Example.of(member);
-				Optional<Member> memberData = memberRepository.findOne(example);
-				Integer memSex = memberData.get().getMemSex();
 
-				List<Member> memberList = null;
+				MemberDTO memberDTO = memberService.findOneByUuid(memUuid);
+
+				Integer memSex = memberDTO.getMemSex();
 
 				/* 取得異性代碼 */
 				if (memSex == 1) {
 					memSex = 2;
-					memberList = (List<Member>) memberRepository.findByMemSex(memSex);
+					memberDTOs = memberService.findByMemSex(memSex);
 				} else if (memSex == 2) {
 					memSex = 1;
-					memberList = (List<Member>) memberRepository.findByMemSex(memSex);
+					memberDTOs = memberService.findByMemSex(memSex);
 				} else if (memSex == 0) {
-					memberList = (List<Member>) memberRepository.findAll();
+					memberDTOs = memberService.findAll();
 				}
 
-				Gson gson = new Gson();
-				JSONArray jsonArray = new JSONArray();
-
-				jsonArray = JSON.parseArray(gson.toJson(memberList));
-				/* 整理json */
-				for (int i = 0; i < jsonArray.size(); i++) {
-					JSONObject j = (JSONObject) jsonArray.get(i);
-					List<MemberImage> memberImageList = memberImageRepository.findByMemUuid((String) j.get("memUuid"));
-					j.put("ImageData", memberImageList);
-					// j.put(key, value)
-					j.remove("memPwd");
-				}
-				result.put("data", jsonArray);
 			}
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
-			states = SystemInfo.DATA_FAIL;
-			msg = e.getMessage();
 		}
 
-		result.put("states", states);
-		result.put("msg", msg);
-		return result;
+		return memberDTOs;
 	}
 
 	@ApiOperation("取得縣市資料")

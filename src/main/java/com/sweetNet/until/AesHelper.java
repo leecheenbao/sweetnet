@@ -1,6 +1,7 @@
 package com.sweetNet.until;
 
 import java.io.UnsupportedEncodingException;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -124,5 +125,11 @@ public class AesHelper {
 			result[i] = (byte) (Integer.parseInt(tmp, 16) & 0xFF);
 		}
 		return result;
+	}
+	
+	public static void main(String[] args) {
+		String str = "admin";
+		System.out.println(AesHelper.decrypt(str));
+		System.out.println(AesHelper.encrypt(str));
 	}
 }

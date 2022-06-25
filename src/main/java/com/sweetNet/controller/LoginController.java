@@ -3,12 +3,14 @@ package com.sweetNet.controller;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.Optional;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -58,20 +60,25 @@ public class LoginController {
 
 			member.setMemMail(memMail);
 			member.setMemPwd(memPwd);
-			MemberDTO memberDTO = memberService.findOneByEmail(memMail);
-			if (AesHelper.decrypt(memberDTO.getMemPwd()).equals(memPwd)) {
+			Example<Member> example = Example.of(member);
+			Optional<Member> eresult = memberRepository.findOne(example);
+			if (eresult.isPresent()) {
 
+				Example<Member> memberExample = Example.of(member);
+				member = memberRepository.findOne(memberExample).get();
 				/* 登入次數 */
 				Integer lgd = 0;
-				if (memberDTO.getMemLgd() != null) {
-					lgd = memberDTO.getMemLgd();
-					memberDTO.setMemLgd(lgd + 1);
-					member = this.getMemberFromMemberDTO(memberDTO);
-					memberService.save(member);
-				}
+				if (member.getMemLgd() != null)
+					lgd = member.getMemLgd();
+				member.setMemLgd(lgd + 1);
+
+				memberRepository.save(member);
+
+				String memUuid = member.getMemUuid();
 
 				HashMap<String, String> map = new HashMap<String, String>();
-				map.put("memUuid", memberDTO.getMemUuid());
+				map.put("memUuid", memUuid);
+
 				String JWTtoken = JwtTokenUtils.generateToken(map); // 取得token
 
 				jsonParam.put("token", JWTtoken);
