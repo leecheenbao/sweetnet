@@ -33,7 +33,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.google.gson.Gson;
 import com.infobip.sms.SendSmsBasic;
-import com.sweetNet.model.City;
+import com.sweetNet.dto.CityDTO;
+import com.sweetNet.dto.MemberInfoDTO;
 import com.sweetNet.model.Member;
 import com.sweetNet.model.MemberImage;
 import com.sweetNet.repository.MemberImageRepository;
@@ -42,10 +43,9 @@ import com.sweetNet.service.CityService;
 import com.sweetNet.service.MemberImageService;
 import com.sweetNet.service.MemberService;
 import com.sweetNet.until.AesHelper;
-import com.sweetNet.until.ConfigInfo;
 import com.sweetNet.until.JwtTokenUtils;
 import com.sweetNet.until.PhoneUtil;
-import com.sweetNet.until.Until;
+import com.sweetNet.until.SystemInfo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -83,52 +83,44 @@ public class MemberController {
 	 */
 	@ApiOperation("建立會員帳號")
 	@PostMapping(value = "/user")
-	public JSONObject createAccount(@RequestBody HashMap<String, String> user) {
-
-		// 獲取到JSONObject
-		JSONObject jsonParam = Until.getJSONParam(request);
+	public void createAccount(MemberInfoDTO memberDTO) {
 		Member member = new Member();
 		List<String> msgList = new ArrayList<String>();
 
-		String states = ConfigInfo.DATA_OK;
+		String states = SystemInfo.DATA_OK;
 		String msg = "failed";
 		String mail_regex = "^\\w{1,63}@[a-zA-Z0-9]{2,63}\\.[a-zA-Z]{2,63}(\\.[a-zA-Z]{2,63})?$";
 		Pattern pattern = Pattern.compile(mail_regex);
 		try {
 
 			String memUuid = UUID.randomUUID().toString();
-			String memMail = user.get("memMail");
-			String memPwd = AesHelper.encrypt(user.get("memPwd"));
-			String memNickname = user.get("memNickname");
-			String memDep = user.get("memDep");
-			Integer memSex = Integer.valueOf(user.get("memSex"));
+			String memMail = memberDTO.getMemMail();
+			String memPwd = AesHelper.encrypt(memberDTO.getMemPwd());
+			String memNickname = memberDTO.getMemNickname();
+			String memDep = memberDTO.getMemDep();
+			Integer memSex = memberDTO.getMemSex();
 
-			member.setMemMail(memMail);
-			Example<Member> example = Example.of(member);
-			Optional<Member> eresult = memberRepository.findOne(example);
-
-			if (eresult.isPresent()) {
-				if (memMail.equals(eresult.get().getMemMail())) {
-					states = ConfigInfo.DATA_FAIL;
-					msgList.add("此信箱已註冊過");
-				}
+			MemberInfoDTO memberDTOcheck = memberService.findOneByEmail(memMail);
+			if (memberDTOcheck.getMemMail() != null) {
+				states = SystemInfo.DATA_FAIL;
+				msgList.add("此信箱已註冊過");
 			}
 
 			if (("").equals(memMail)) {
 				msgList.add("請檢察Email");
-				states = ConfigInfo.DATA_FAIL;
+				states = SystemInfo.DATA_FAIL;
 			} else if (!pattern.matcher(memMail).find()) {
 				msgList.add("Email格式不正確");
-				states = ConfigInfo.DATA_FAIL;
+				states = SystemInfo.DATA_FAIL;
 			} else if (("").equals(AesHelper.decrypt(memPwd)) || AesHelper.decrypt(memPwd).length() < 8) {
 				msgList.add("請檢查密碼");
-				states = ConfigInfo.DATA_FAIL;
+				states = SystemInfo.DATA_FAIL;
 			} else if (("").equals(memNickname)) {
 				msgList.add("請檢查暱稱");
-				states = ConfigInfo.DATA_FAIL;
+				states = SystemInfo.DATA_FAIL;
 			} else if (("").equals(memSex)) {
 				msgList.add("請檢查資料性別");
-				states = ConfigInfo.DATA_FAIL;
+				states = SystemInfo.DATA_FAIL;
 			}
 
 			member.setMemUuid(memUuid);
@@ -138,14 +130,14 @@ public class MemberController {
 			member.setMemDep(memDep);
 			member.setMemSex(memSex);
 
-			if (states == ConfigInfo.DATA_OK) {
+			if (states == SystemInfo.DATA_OK) {
 				memberService.save(member);
 				msgList.add("OK");
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			states = ConfigInfo.DATA_FAIL;
+			states = SystemInfo.DATA_FAIL;
 			msg = e.getMessage();
 		}
 
@@ -153,7 +145,6 @@ public class MemberController {
 		result.put("states", states);
 		result.put("msg", msgList);
 
-		return result;
 	}
 
 	/**
@@ -170,11 +161,10 @@ public class MemberController {
 					+ "資產(萬)：memAssets、VIP狀態(0：一般、1：VIP):memIsvip") @RequestBody HashMap<String, String> user) {
 
 		String JWTtoken = JwtTokenUtils.generateToken(user); // 取得token
-		String states = ConfigInfo.DATA_ERR_SYS;
-		String msg = "failed";
+		String states = SystemInfo.DATA_ERR_SYS;
+		String msg = "";
 		String phone_regex = "(09)+[\\d]{8}";
 		Pattern pattern = Pattern.compile(phone_regex);
-		List<String> msgList = new ArrayList<String>();
 		try {
 
 			tokenCheck = JwtTokenUtils.validateToken(JWTtoken);
@@ -183,6 +173,7 @@ public class MemberController {
 				String token = au.substring(7);
 				String memUuid = JwtTokenUtils.getJwtMemUuid(token);
 				String memName = user.get("memName");
+				String memNickname = user.get("memNickname");
 				String memPhone = user.get("memPhone");
 				String memBirthday = user.get("memBirthday");
 				Integer memAge = Integer.valueOf(user.get("memAge"));
@@ -210,8 +201,8 @@ public class MemberController {
 				Integer memSta = 1;
 
 				if (("").equals(memPhone) || !pattern.matcher(memPhone).find()) {
-					states = ConfigInfo.DATA_FAIL;
-					msgList.add("請輸入正確手機號碼");
+					states = SystemInfo.DATA_FAIL;
+					msg = "請輸入正確手機號碼";
 				}
 				Member member = new Member();
 				member.setMemUuid(memUuid);
@@ -220,6 +211,7 @@ public class MemberController {
 
 				member.setMemUuid(memUuid);
 				member.setMemName(memName);
+				member.setMemNickname(memNickname);
 				member.setMemPhone(memPhone);
 				member.setMemBirthday(memBirthday);
 				member.setMemAge(memAge);
@@ -237,20 +229,20 @@ public class MemberController {
 				member.setMemRdate(mem_rdate);
 				member.setMemSta(memSta);
 				memberService.save(member);
-				states = ConfigInfo.DATA_OK;
-				msgList.add("Insert Success");
+				states = SystemInfo.DATA_OK;
+				msg = "Insert Success";
 			} else {
 
 			}
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
-			states = ConfigInfo.DATA_FAIL;
+			states = SystemInfo.DATA_FAIL;
 			msg = e.getMessage();
 		}
 
 		JSONObject result = new JSONObject();
 		result.put("states", states);
-		result.put("msg", msgList);
+		result.put("msg", msg);
 
 		return result;
 	}
@@ -263,13 +255,11 @@ public class MemberController {
 	 */
 	@ApiOperation("顯示個人資料")
 	@GetMapping(value = "/user")
-	public JSONObject getUserInfo(@RequestHeader("Authorization") String au) {
+	public MemberInfoDTO getUserInfo(@RequestHeader("Authorization") String au) {
 		String token = au.substring(7);
 		String memUuid = JwtTokenUtils.getJwtMemUuid(token); // 取得token
 
-		String msg = "failed";
-		String states = ConfigInfo.DATA_FAIL;
-		JSONObject result = new JSONObject();
+		MemberInfoDTO memberDTO = new MemberInfoDTO();
 
 		try {
 
@@ -277,28 +267,16 @@ public class MemberController {
 
 			if (tokenCheck) {
 
-				Member member = new Member();
-				member.setMemUuid(memUuid);
-
-				Example<Member> example = Example.of(member);
-				Member ud = memberRepository.findOne(example).get();
-				result.put("data", ud.toJson());
+				memberDTO = memberService.findOneByUuid(memUuid);
 
 				List<MemberImage> memberImageList = memberImageRepository.findByMemUuid(memUuid);
-				result.put("imagesData", memberImageList);
 
-				states = ConfigInfo.DATA_OK;
-				msg = "success";
 			}
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
-			states = ConfigInfo.DATA_FAIL;
-			msg = e.getMessage();
 		}
 
-		result.put("states", states);
-		result.put("msg", msg);
-		return result;
+		return memberDTO;
 	}
 
 	/**
@@ -309,12 +287,10 @@ public class MemberController {
 	 */
 	@ApiOperation("顯示會員資料 - 以登入會員的性別分類，男生只能看到女生、女生只能看到男生並加入以縣市搜尋")
 	@GetMapping(value = "/users/{city}")
-	public JSONObject getUserInfoByCity(@RequestHeader("Authorization") String au, @PathVariable String city) {
-		JSONObject result = new JSONObject();
+	public List<MemberInfoDTO> getUserInfoByCity(@RequestHeader("Authorization") String au, @PathVariable String city) {
 		String token = au.substring(7);
-		String msg = "success";
-		String states = ConfigInfo.DATA_OK;
 
+		List<MemberInfoDTO> memberDTOs = new ArrayList<MemberInfoDTO>();
 		try {
 
 			String memUuid = JwtTokenUtils.getJwtMemUuid(token);
@@ -322,48 +298,30 @@ public class MemberController {
 
 			if (tokenCheck) {
 
-				Member member = new Member();
-				member.setMemUuid(memUuid);
-				Example<Member> example = Example.of(member);
-				Optional<Member> memberData = memberRepository.findOne(example);
-				Integer memSex = memberData.get().getMemSex();
+				MemberInfoDTO memberDTO = memberService.findOneByUuid(memUuid);
+
+				Integer memSex = memberDTO.getMemSex();
 				String memArea = city;
-				List<Member> memberList = null;
 
 				/* 取得異性代碼 */
 				if (memSex == 1) {
 					memSex = 2;
-					memberList = (List<Member>) memberRepository.findByMemSexAndMemArea(memSex, memArea);
+					memberDTOs = memberService.findByMemSexAndMemArea(memSex, memArea);
 				} else if (memSex == 2) {
 					memSex = 1;
-					memberList = (List<Member>) memberRepository.findByMemSexAndMemArea(memSex, memArea);
-				} else if (memSex == 0) {
-					memberList = (List<Member>) memberRepository.findAll();
+					memberDTOs = memberService.findByMemSexAndMemArea(memSex, memArea);
 				}
 
-				Gson gson = new Gson();
-				JSONArray jsonArray = new JSONArray();
-
-				jsonArray = JSON.parseArray(gson.toJson(memberList));
-				/* 整理json */
-				for (int i = 0; i < jsonArray.size(); i++) {
-					JSONObject j = (JSONObject) jsonArray.get(i);
-					List<MemberImage> memberImageList = memberImageRepository.findByMemUuid((String) j.get("memUuid"));
-					j.put("ImageData", memberImageList);
-					// j.put(key, value)
-					j.remove("memPwd");
+				if (memSex == 0) {
+					memberDTOs = memberService.findAll();
 				}
-				result.put("data", jsonArray);
+
 			}
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
-			states = ConfigInfo.DATA_FAIL;
-			msg = e.getMessage();
 		}
 
-		result.put("states", states);
-		result.put("msg", msg);
-		return result;
+		return memberDTOs;
 	}
 
 	/**
@@ -378,7 +336,7 @@ public class MemberController {
 		JSONObject result = new JSONObject();
 		String token = au.substring(7);
 		String msg = "success";
-		String states = ConfigInfo.DATA_OK;
+		String states = SystemInfo.DATA_OK;
 
 		try {
 
@@ -422,7 +380,7 @@ public class MemberController {
 			}
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
-			states = ConfigInfo.DATA_FAIL;
+			states = SystemInfo.DATA_FAIL;
 			msg = e.getMessage();
 		}
 
@@ -433,22 +391,15 @@ public class MemberController {
 
 	@ApiOperation("取得縣市資料")
 	@GetMapping(value = "/country")
-	public JSONArray getCountry() {
-		JSONArray jsonArray = new JSONArray();
+	public List<CityDTO> getCountry() {
+		List<CityDTO> cityDTOs = null;
 		try {
-
-			Iterable<City> citys = cityService.findAll();
-			for (City c : citys) {
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("city", c.getCity());
-				jsonObject.put("cityId", c.getCityId());
-				jsonArray.add(jsonObject);
-			}
-			System.out.println(jsonArray);
+			cityDTOs = cityService.findAll();
+			System.out.println(cityDTOs);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return jsonArray;
+		return cityDTOs;
 	}
 
 	@ApiOperation("發送OTP簡訊")
@@ -457,7 +408,7 @@ public class MemberController {
 		JSONObject result = new JSONObject();
 		String token = au.substring(7);
 		String msg = "success";
-		String states = ConfigInfo.DATA_OK;
+		String states = SystemInfo.DATA_OK;
 
 		try {
 
@@ -481,7 +432,7 @@ public class MemberController {
 
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
-			states = ConfigInfo.DATA_FAIL;
+			states = SystemInfo.DATA_FAIL;
 			msg = e.getMessage();
 		}
 		result.put("states", states);
@@ -495,7 +446,7 @@ public class MemberController {
 		JSONObject result = new JSONObject();
 		String token = au.substring(7);
 		String msg = "success";
-		String states = ConfigInfo.DATA_OK;
+		String states = SystemInfo.DATA_OK;
 
 		try {
 			tokenCheck = JwtTokenUtils.validateToken(token);
@@ -522,7 +473,7 @@ public class MemberController {
 
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
-			states = ConfigInfo.DATA_FAIL;
+			states = SystemInfo.DATA_FAIL;
 			msg = e.getMessage();
 		}
 

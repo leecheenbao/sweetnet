@@ -1,6 +1,7 @@
 package com.sweetNet.service;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
+import com.sweetNet.dto.CityDTO;
 import com.sweetNet.model.City;
 import com.sweetNet.repository.CityRepository;
 import com.sweetNet.until.GetLocalJSON;
@@ -19,8 +21,16 @@ public class CityServiceImpl implements CityService {
 	private CityRepository cityRepository;
 
 	@Override
-	public Iterable<City> findAll() {
-		return cityRepository.findAll();
+	public List<CityDTO> findAll() {
+		List<City> citys = cityRepository.findAll();
+		List<CityDTO> cityDTOs = new ArrayList<CityDTO>();
+		for (City city : citys) {
+			CityDTO cityDTO = new CityDTO();
+			cityDTO.setCity(city.getCity());
+			cityDTO.setCityId(city.getCityId());
+			cityDTOs.add(cityDTO);
+		}
+		return cityDTOs;
 	}
 
 	@Override
@@ -29,9 +39,12 @@ public class CityServiceImpl implements CityService {
 	}
 
 	@Override
-	public List<City> findByCityId(String cityId) {
-
-		return cityRepository.findByCityId(cityId);
+	public CityDTO findByCityId(String cityId) {
+		City city = cityRepository.findByCityId(cityId);
+		CityDTO cityDTO = new CityDTO();
+		cityDTO.setCity(city.getCity());
+		cityDTO.setCityId(city.getCityId());
+		return null;
 	}
 
 	@Autowired

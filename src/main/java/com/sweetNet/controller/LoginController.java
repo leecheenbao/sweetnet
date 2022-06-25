@@ -19,8 +19,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.sweetNet.model.Member;
 import com.sweetNet.repository.MemberRepository;
 import com.sweetNet.until.AesHelper;
-import com.sweetNet.until.ConfigInfo;
 import com.sweetNet.until.JwtTokenUtils;
+import com.sweetNet.until.SystemInfo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -80,7 +80,7 @@ public class LoginController {
 
 				jsonParam.put("token", JWTtoken);
 				jsonParam.put("msg", "登入成功！");
-				jsonParam.put("status", ConfigInfo.DATA_OK);
+				jsonParam.put("status", SystemInfo.DATA_OK);
 				jsonParam.put("data", userData);
 				jsonStr = jsonParam.toJSONString();
 
@@ -88,7 +88,7 @@ public class LoginController {
 			} else {
 
 				jsonParam.put("msg", "登入失敗 !  請檢查信箱與密碼是否輸入錯誤 !?");
-				jsonParam.put("status", ConfigInfo.DATA_FAIL);
+				jsonParam.put("status", SystemInfo.DATA_FAIL);
 				jsonStr = jsonParam.toJSONString();
 
 				out.println(jsonStr);

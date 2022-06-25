@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sweetNet.model.Member;
+import com.sweetNet.dto.MemberInfoDTO;
 import com.sweetNet.model.Message;
 import com.sweetNet.model.MessageContent;
 import com.sweetNet.repository.MessageContentRepository;
@@ -33,8 +33,8 @@ import com.sweetNet.repository.MessageRepository;
 import com.sweetNet.service.MemberService;
 import com.sweetNet.service.MessageContentService;
 import com.sweetNet.service.MessageService;
-import com.sweetNet.until.ConfigInfo;
 import com.sweetNet.until.JwtTokenUtils;
+import com.sweetNet.until.SystemInfo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -62,7 +62,7 @@ public class MessageController {
 		// 獲取到JSONObject
 		JSONObject jsonParam = new JSONObject();
 		String token = au.substring(7);
-		String states = ConfigInfo.DATA_OK;
+		String states = SystemInfo.DATA_OK;
 		String recId = JwtTokenUtils.getJwtMemUuid(token);
 		try {
 			tokenCheck = JwtTokenUtils.validateToken(token);
@@ -81,8 +81,8 @@ public class MessageController {
 					String content = convertBlob(blob);
 					String pdate = mcList.get(index++).getPdate();
 
-					Member sendMember = memberService.findOneByUuid(sendId);
-					Member recMember = memberService.findOneByUuid(recId);
+					MemberInfoDTO sendMember = memberService.findOneByUuid(sendId);
+					MemberInfoDTO recMember = memberService.findOneByUuid(recId);
 					String sendNickName = sendMember.getMemNickname();
 					String recNickName = recMember.getMemNickname();
 
@@ -101,12 +101,12 @@ public class MessageController {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			states = ConfigInfo.DATA_ERR_SYS;
+			states = SystemInfo.DATA_ERR_SYS;
 			jsonParam.put("msg", e.getMessage());
 			jsonParam.put("states", states);
 			return jsonParam;
 		}
-		jsonParam.put("msg", ConfigInfo.SYS_MESSAGE_SUCCESS);
+		jsonParam.put("msg", SystemInfo.SYS_MESSAGE_SUCCESS);
 		jsonParam.put("states", states);
 
 		return jsonParam;
@@ -118,7 +118,7 @@ public class MessageController {
 		// 獲取到JSONObject
 		JSONObject jsonParam = new JSONObject();
 		String token = au.substring(7);
-		String states = ConfigInfo.DATA_OK;
+		String states = SystemInfo.DATA_OK;
 		String recId = JwtTokenUtils.getJwtMemUuid(token);
 		try {
 			tokenCheck = JwtTokenUtils.validateToken(token);
@@ -134,8 +134,8 @@ public class MessageController {
 					Blob blob = mc.getContent();
 					String content = convertBlob(blob);
 
-					Member sendMember = memberService.findOneByUuid(m.getSendId());
-					Member recMember = memberService.findOneByUuid(recId);
+					MemberInfoDTO sendMember = memberService.findOneByUuid(m.getSendId());
+					MemberInfoDTO recMember = memberService.findOneByUuid(recId);
 					String sendNickName = sendMember.getMemNickname();
 					String recNickName = recMember.getMemNickname();
 
@@ -154,12 +154,12 @@ public class MessageController {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			states = ConfigInfo.DATA_ERR_SYS;
+			states = SystemInfo.DATA_ERR_SYS;
 			jsonParam.put("msg", e.getMessage());
 			jsonParam.put("states", states);
 			return jsonParam;
 		}
-		jsonParam.put("msg", ConfigInfo.SYS_MESSAGE_SUCCESS);
+		jsonParam.put("msg", SystemInfo.SYS_MESSAGE_SUCCESS);
 		jsonParam.put("states", states);
 
 		return jsonParam;
@@ -171,7 +171,7 @@ public class MessageController {
 		// 獲取到JSONObject
 		JSONObject jsonParam = new JSONObject();
 		String token = au.substring(7);
-		String states = ConfigInfo.DATA_OK;
+		String states = SystemInfo.DATA_OK;
 		String sendId = JwtTokenUtils.getJwtMemUuid(token);
 		try {
 			tokenCheck = JwtTokenUtils.validateToken(token);
@@ -206,12 +206,12 @@ public class MessageController {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			states = ConfigInfo.DATA_ERR_SYS;
+			states = SystemInfo.DATA_ERR_SYS;
 			jsonParam.put("msg", e.getMessage());
 			jsonParam.put("states", states);
 			return jsonParam;
 		}
-		jsonParam.put("msg", ConfigInfo.SYS_MESSAGE_SUCCESS);
+		jsonParam.put("msg", SystemInfo.SYS_MESSAGE_SUCCESS);
 		jsonParam.put("states", states);
 		return jsonParam;
 	}

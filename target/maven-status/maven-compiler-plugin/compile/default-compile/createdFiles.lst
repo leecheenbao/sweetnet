@@ -6,9 +6,7 @@ com\sweetNet\controller\MemberController.class
 com\sweetNet\repository\MemberRepository.class
 com\sweetNet\controller\MessageController.class
 com\sweetNet\until\Until.class
-META-INF\maven\com.sweetnet\sweetnet\pom.xml
 com\sweetNet\until\GetGooglePlace.class
-com\sweetNet\until\ConfigInfo.class
 com\sweetNet\service\MessageContentServiceImpl.class
 com\sweetNet\service\MessageService.class
 com\sweetNet\until\PhoneUtil.class
@@ -23,7 +21,6 @@ com\sweetNet\repository\MessageRepository.class
 com\sweetNet\service\MemberServiceImpl.class
 com\sweetNet\service\MemberImageServiceImpl.class
 com\sweetNet\model\MemberImage.class
-com\sweetNet\until\PropUtil.class
 com\sweetNet\controller\ImageController.class
 com\sweetNet\CorsFilter.class
 com\sweetNet\service\MessageServiceImpl.class
@@ -31,8 +28,9 @@ com\sweetNet\service\MessageContentService.class
 com\sweetNet\until\httpPostWithJson.class
 com\sweetNet\service\CityServiceImpl.class
 com\sweetNet\until\GetLocalJSON.class
-META-INF\maven\com.sweetnet\sweetnet\pom.properties
 com\sweetNet\model\Member.class
+com\sweetNet\until\SystemInfo.class
+com\sweetNet\until\ImageUntil.class
 com\sweetNet\controller\LoginController.class
 com\sweetNet\until\CashPay.class
 com\sweetNet\repository\CityRepository.class

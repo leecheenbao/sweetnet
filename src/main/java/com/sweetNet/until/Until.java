@@ -1,12 +1,8 @@
 package com.sweetNet.until;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -83,35 +79,7 @@ public class Until {
 		String regex = "^\\w{1,63}@[a-zA-Z0-9]{2,63}\\.[a-zA-Z]{2,63}(\\.[a-zA-Z]{2,63})?$";
 	}
 
-	public static Map<String, String> uploadFile(byte[] file, String filePath, String memUuid) throws Exception {
-		Map<String, String> map = new HashMap<String, String>();
-		File targetFile = new File(filePath + "/" + memUuid);
-		if (!targetFile.exists()) {
-			targetFile.mkdirs();
-		}
-		String fileName = file.toString();
-		/* 取得副檔名 */
-		String fe = "";
-		if (fileName.contains("."))
-			fe = fileName.substring(fileName.lastIndexOf(".") + 1);
 
-		Date date = new Date();
-		String dateStr = String.valueOf(date.getTime());
-
-		/* 重組檔名 */
-		fileName = dateStr + ".jpeg" + fe;
-
-		String url = filePath + "/" + memUuid + "/" + fileName;
-		FileOutputStream out = new FileOutputStream(url);
-		out.write(file);
-		out.flush();
-		out.close();
-
-		map.put("imageName", fileName);
-		map.put("imageUrl", url);
-
-		return map;
-	}
 
 	public static String encodeBase64(byte[] encodeMe) {
 		byte[] encodedBytes = Base64.getEncoder().encode(encodeMe);
@@ -138,6 +106,5 @@ public class Until {
 				RECIPIENT, MESSAGE_TEXT);
 
 	}
-	
-	
+
 }

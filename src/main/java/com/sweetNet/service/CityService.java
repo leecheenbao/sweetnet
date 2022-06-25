@@ -1,13 +1,16 @@
 package com.sweetNet.service;
 
+import java.util.List;
+
+import com.sweetNet.dto.CityDTO;
 import com.sweetNet.model.City;
 
 public interface CityService {
 
-	Iterable<City> findAll();
+	List<CityDTO> findAll();
 
 	void save(City contact);
 
-	Iterable<City> findByCityId(String cityId);
+	CityDTO findByCityId(String cityId);
 
 }

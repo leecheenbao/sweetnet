@@ -1,12 +1,21 @@
 package com.sweetNet.service;
 
+import java.util.List;
+
+import com.sweetNet.dto.MemberInfoDTO;
 import com.sweetNet.model.Member;
 
 public interface MemberService {
 
-	Iterable<Member> findAll();
+	List<MemberInfoDTO> findAll();
 
-	void save(Member contact);
+	List<MemberInfoDTO> findByMemSex(Integer memSex);
 
-	Member findOneByUuid(String memberUuid);
+	List<MemberInfoDTO> findByMemSexAndMemArea(Integer memSex, String memArea);
+
+	MemberInfoDTO findOneByEmail(String memMail);
+
+	MemberInfoDTO findOneByUuid(String memberUuid);
+
+	void save(Member member);
 }
