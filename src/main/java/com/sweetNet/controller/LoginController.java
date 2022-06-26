@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.servlet.ServletException;
-import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -49,7 +48,7 @@ public class LoginController {
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memPwd", value = "密碼", example = "12345678") })
 	@ApiOperation("登入")
 	@PostMapping(value = "/login")
-	protected String doPost(@RequestBody @Valid LoginDTO loginDTO) throws ServletException, IOException {
+	protected String doPost(@RequestBody LoginDTO loginDTO) throws ServletException, IOException {
 
 		Member member = new Member();
 
@@ -86,7 +85,7 @@ public class LoginController {
 
 				String JWTtoken = JwtTokenUtils.generateToken(dataMap); // 取得token
 				map.put("token", JWTtoken);
-			} else {
+			}else {
 				states = SystemInfo.DATA_FAIL;
 				msg = "登入失敗 !  請檢查信箱與密碼是否輸入錯誤 !?";
 			}

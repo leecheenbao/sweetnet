@@ -3,6 +3,7 @@ package com.sweetNet.controller;
 import java.security.SignatureException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +14,6 @@ import java.util.regex.Pattern;
 import javax.security.auth.message.AuthException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 
 import org.jboss.aerogear.security.otp.api.Base32;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +36,7 @@ import com.sweetNet.dto.MemberInfoDTO;
 import com.sweetNet.dto.PhoneOtpDTO;
 import com.sweetNet.dto.SignUpDTO;
 import com.sweetNet.model.Member;
+import com.sweetNet.model.MemberImage;
 import com.sweetNet.repository.MemberImageRepository;
 import com.sweetNet.repository.MemberRepository;
 import com.sweetNet.service.CityService;
@@ -81,18 +82,19 @@ public class MemberController {
 	 * @return JSONObject
 	 */
 	@ApiImplicitParams({
-			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memMail", value = "會員電子郵件（）", example = "sweetnet@gmail.com"),
-			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memPwd", value = "會員電子郵件（需大於等於8碼）", example = "12345678"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memMail", value = "會員電子郵件", example = "sweetnet@gmail.com"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memPwd", value = "會員電子郵件", example = "12345678"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memNickname", value = "會員暱稱", example = "black"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memDep", value = "會員自述", example = "我有很多錢$$$"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memSex", value = "性別（0：女生、1：男生）", example = "1") })
 	@ApiOperation("建立會員帳號")
 	@PostMapping(value = "/user")
-	public String createAccount(@RequestBody @Valid SignUpDTO signUpDTO) {
+	public String createAccount(@RequestBody SignUpDTO signUpDTO) {
 		Member member = new Member();
 		String msg = SystemInfo.SYS_MESSAGE_SUCCESS;
 		String states = SystemInfo.DATA_OK;
-
+		String mail_regex = "^\\w{1,63}@[a-zA-Z0-9]{2,63}\\.[a-zA-Z]{2,63}(\\.[a-zA-Z]{2,63})?$";
+		Pattern pattern = Pattern.compile(mail_regex);
 		try {
 
 			String memUuid = UUID.randomUUID().toString();
@@ -104,7 +106,24 @@ public class MemberController {
 
 			MemberDTO memberDTOcheck = memberService.findOneByEmail(memMail);
 			if (memberDTOcheck.getMemMail() != null) {
-				msg = SystemInfo.ALREADY_REGISTER;
+				states = SystemInfo.DATA_FAIL;
+				msg = "此信箱已註冊過";
+			}
+
+			if (("").equals(memMail)) {
+				msg = "請檢察Email";
+				states = SystemInfo.DATA_FAIL;
+			} else if (!pattern.matcher(memMail).find()) {
+				msg = "Email格式不正確";
+				states = SystemInfo.DATA_FAIL;
+			} else if (("").equals(AesHelper.decrypt(memPwd)) || AesHelper.decrypt(memPwd).length() < 8) {
+				msg = "請檢查密碼";
+				states = SystemInfo.DATA_FAIL;
+			} else if (("").equals(memNickname)) {
+				msg = "請檢查暱稱";
+				states = SystemInfo.DATA_FAIL;
+			} else if (("").equals(memSex)) {
+				msg = "請檢查資料性別";
 				states = SystemInfo.DATA_FAIL;
 			}
 
@@ -119,8 +138,8 @@ public class MemberController {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			msg = SystemInfo.SYS_MESSAGE_ERROR;
 			states = SystemInfo.DATA_FAIL;
+			msg = SystemInfo.SYS_MESSAGE_ERROR;
 		}
 
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -173,17 +192,38 @@ public class MemberController {
 			tokenCheck = JwtTokenUtils.validateToken(token);
 
 			if (tokenCheck) {
-
+				String memName = memberInfoDTO.getMemName();
+				String memNickname = memberInfoDTO.getMemNickname();
+				String memPhone = memberInfoDTO.getMemPhone();
+				String memBirthday = memberInfoDTO.getMemBirthday();
+				Integer memAge = Integer.valueOf(memberInfoDTO.getMemAge());
+				String memAddress = memberInfoDTO.getMemAddress();
+				String memArea = memberInfoDTO.getMemArea();
+				Integer memHeight = Integer.valueOf(memberInfoDTO.getMemHeight());
+				Integer memWeight = Integer.valueOf(memberInfoDTO.getMemWeight());
+				Integer memEdu = Integer.valueOf(memberInfoDTO.getMemEdu());
+				Integer memMarry = Integer.valueOf(memberInfoDTO.getMemEdu());
+				Integer memAlcohol = Integer.valueOf(memberInfoDTO.getMemAlcohol());
+				Integer memSmoke = Integer.valueOf(memberInfoDTO.getMemSmoke());
+				Integer memIncome = Integer.valueOf(memberInfoDTO.getMemIncome());
+				Integer memAssets = Integer.valueOf(memberInfoDTO.getMemAssets());
 				Integer memIsvip = 0;
 
 				if (memberInfoDTO.getMemIsvip() != null) {
 					memIsvip = Integer.valueOf(memberInfoDTO.getMemIsvip());
 				}
 
-				// 資料修改日期
-				String mem_rdate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+				// 今日日期
+				SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd");
+				Calendar calendar = Calendar.getInstance();
+				Date dateObj = calendar.getTime();
+				String mem_rdate = dtf.format(dateObj);
 				Integer memSta = 1;
 
+				if (("").equals(memPhone) || !pattern.matcher(memPhone).find()) {
+					states = SystemInfo.DATA_FAIL;
+					msg = SystemInfo.ERROR_PHONE;
+				}
 				Member member = new Member();
 				member.setMemUuid(memUuid);
 				MemberDTO memberDTO = memberService.findOneByUuid(memUuid);
@@ -195,28 +235,27 @@ public class MemberController {
 				member.setMemDep(memberDTO.getMemDep());
 				member.setMemLgd(memberDTO.getMemLgd());
 				member.setPhoneStates(memberDTO.getPhoneStates());
+
 				member.setMemUuid(memUuid);
-				member.setMemName(memberInfoDTO.getMemName());
-				member.setMemNickname(memberInfoDTO.getMemNickname());
-				member.setMemPhone(memberInfoDTO.getMemPhone());
-				member.setMemBirthday(memberInfoDTO.getMemBirthday());
-				member.setMemAge(memberInfoDTO.getMemAge());
-				member.setMemAddress(memberInfoDTO.getMemAddress());
-				member.setMemArea(memberInfoDTO.getMemArea());
-				member.setMemHeight(memberInfoDTO.getMemHeight());
-				member.setMemWeight(memberInfoDTO.getMemWeight());
-				member.setMemEdu(memberInfoDTO.getMemEdu());
-				member.setMemMarry(memberInfoDTO.getMemMarry());
-				member.setMemAlcohol(memberInfoDTO.getMemAlcohol());
-				member.setMemSmoke(memberInfoDTO.getMemSmoke());
-				member.setMemIncome(memberInfoDTO.getMemIncome());
-				member.setMemAssets(memberInfoDTO.getMemAssets());
+				member.setMemName(memName);
+				member.setMemNickname(memNickname);
+				member.setMemPhone(memPhone);
+				member.setMemBirthday(memBirthday);
+				member.setMemAge(memAge);
+				member.setMemAddress(memAddress);
+				member.setMemArea(memArea);
+				member.setMemHeight(memHeight);
+				member.setMemWeight(memWeight);
+				member.setMemEdu(memEdu);
+				member.setMemMarry(memMarry);
+				member.setMemAlcohol(memAlcohol);
+				member.setMemSmoke(memSmoke);
+				member.setMemIncome(memIncome);
+				member.setMemAssets(memAssets);
 				member.setMemIsvip(memIsvip);
 				member.setMemRdate(mem_rdate);
 				member.setMemSta(memSta);
-
 				memberService.save(member);
-
 				states = SystemInfo.DATA_OK;
 				msg = SystemInfo.SYS_MESSAGE_SUCCESS;
 			} else {
@@ -250,10 +289,17 @@ public class MemberController {
 		String memUuid = JwtTokenUtils.getJwtMemUuid(token); // 取得token
 
 		MemberDTO memberDTO = new MemberDTO();
+
 		try {
+
 			tokenCheck = JwtTokenUtils.validateToken(token);
+
 			if (tokenCheck) {
+
 				memberDTO = memberService.findOneByUuid(memUuid);
+
+				List<MemberImage> memberImageList = memberImageRepository.findByMemUuid(memUuid);
+
 			}
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
@@ -413,7 +459,7 @@ public class MemberController {
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "secret", example = "6NMG67YDLUWNXQ3W") })
 	@ApiOperation("驗證OTP簡訊")
 	@PostMapping(value = "/OTP/verifyOTP")
-	public String verifyOTP(@RequestHeader("Authorization") String au, @RequestBody PhoneOtpDTO phoneOtpDTO) {
+	public String verifyOTP(@RequestHeader("Authorization") String au,@RequestBody PhoneOtpDTO phoneOtpDTO) {
 		Gson gson = new Gson();
 		Map<String, String> map = new HashMap<String, String>();
 

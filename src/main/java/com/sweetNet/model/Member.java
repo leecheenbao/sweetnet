@@ -1,16 +1,17 @@
 package com.sweetNet.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sun.istack.NotNull;
 
 @Entity
 @Table(name = "MEMBER")
-public class Member {
+public class Member implements Serializable {
 
 	/**
 	 *
@@ -18,7 +19,6 @@ public class Member {
 	private static long serialVersionUID = 1L;
 
 	@Id
-	@NotNull
 	@Column(name = "memUuid")
 	private String memUuid;
 	@Column(name = "memMail")

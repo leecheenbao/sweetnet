@@ -2,24 +2,16 @@ package com.sweetNet.dto;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
+import com.alibaba.fastjson.JSONObject;
 
 public class SignUpDTO implements Serializable {
 
-	@Email(message = "帳號必須是Email 格式")
-	@NotBlank(message = "帳號不可為空")
 	private String memMail;
 
-	@NotBlank(message = "密碼不可為空")
-	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[\\w]{6,16}$", message = "密碼必須為長度6~16位碼大小寫英文加數字")
 	private String memPwd;
 
-	@NotBlank(message = "暱稱不可為空")
 	private String memNickname;
 
-	@NotBlank(message = "自述不可為空")
 	private String memDep;
 
 	private Integer memSex;
@@ -76,6 +68,16 @@ public class SignUpDTO implements Serializable {
 
 	public void setMemSex(Integer memSex) {
 		this.memSex = memSex;
+	}
+
+	public JSONObject toJson() {
+		JSONObject json = new JSONObject();
+
+		json.put("memMail", memMail);
+		json.put("memNickname", memNickname);
+		json.put("memDep", memDep);
+		json.put("memSex", memSex);
+		return json;
 	}
 
 }

@@ -1,14 +1,8 @@
 package com.sweetNet.dto;
 
-import javax.validation.constraints.NotBlank;
-
 public class PhoneOtpDTO {
-	@NotBlank(message = "電話不可為空")
 	private String memPhone;
-	
 	private String secret;
-
-	@NotBlank(message = "OTP不可為空")
 	private String otp;
 
 	public String getOtp() {

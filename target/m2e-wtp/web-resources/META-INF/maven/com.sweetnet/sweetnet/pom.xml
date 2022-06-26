@@ -45,10 +45,6 @@
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.hibernate.validator</groupId>
-			<artifactId>hibernate-validator</artifactId>
-		</dependency>
 		<!-- For DataBase connection -->
 		<dependency>
 			<groupId>mysql</groupId>
