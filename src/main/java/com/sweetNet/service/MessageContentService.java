@@ -1,10 +1,12 @@
 package com.sweetNet.service;
 
+import java.util.List;
+
 import com.sweetNet.model.MessageContent;
 
 public interface MessageContentService {
 
-	Iterable<MessageContent> findAll();
+	List<MessageContent> findAll();
 
 	void save(MessageContent contact);
 
