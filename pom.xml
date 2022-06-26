@@ -40,6 +40,11 @@
 			<optional>true</optional>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<!-- For DataBase connection -->
 		<dependency>
 			<groupId>mysql</groupId>
@@ -139,6 +144,7 @@
 
 
 	<build>
+		<finalName>sweetnet</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

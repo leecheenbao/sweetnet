@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +48,8 @@ import com.sweetNet.until.PhoneUtil;
 import com.sweetNet.until.SystemInfo;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 /**
@@ -78,12 +81,17 @@ public class MemberController {
 	 * @param request
 	 * @return JSONObject
 	 */
+	@ApiImplicitParams({
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memMail", value = "會員電子郵件", example = "sweetnet@gmail.com"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memPwd", value = "會員電子郵件", example = "12345678"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memNickname", value = "會員暱稱", example = "black"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memDep", value = "會員自述", example = "我有很多錢$$$"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memSex", value = "性別（0：女生、1：男生）", example = "1") })
 	@ApiOperation("建立會員帳號")
 	@PostMapping(value = "/user")
-	public void createAccount(SignUpDTO signUpDTO) {
+	public String createAccount(@RequestBody SignUpDTO signUpDTO) {
 		Member member = new Member();
-		List<String> msgList = new ArrayList<String>();
-
+		String msg = SystemInfo.SYS_MESSAGE_SUCCESS;
 		String states = SystemInfo.DATA_OK;
 		String mail_regex = "^\\w{1,63}@[a-zA-Z0-9]{2,63}\\.[a-zA-Z]{2,63}(\\.[a-zA-Z]{2,63})?$";
 		Pattern pattern = Pattern.compile(mail_regex);
@@ -99,23 +107,23 @@ public class MemberController {
 			MemberDTO memberDTOcheck = memberService.findOneByEmail(memMail);
 			if (memberDTOcheck.getMemMail() != null) {
 				states = SystemInfo.DATA_FAIL;
-				msgList.add("此信箱已註冊過");
+				msg = "此信箱已註冊過";
 			}
 
 			if (("").equals(memMail)) {
-				msgList.add("請檢察Email");
+				msg = "請檢察Email";
 				states = SystemInfo.DATA_FAIL;
 			} else if (!pattern.matcher(memMail).find()) {
-				msgList.add("Email格式不正確");
+				msg = "Email格式不正確";
 				states = SystemInfo.DATA_FAIL;
 			} else if (("").equals(AesHelper.decrypt(memPwd)) || AesHelper.decrypt(memPwd).length() < 8) {
-				msgList.add("請檢查密碼");
+				msg = "請檢查密碼";
 				states = SystemInfo.DATA_FAIL;
 			} else if (("").equals(memNickname)) {
-				msgList.add("請檢查暱稱");
+				msg = "請檢查暱稱";
 				states = SystemInfo.DATA_FAIL;
 			} else if (("").equals(memSex)) {
-				msgList.add("請檢查資料性別");
+				msg = "請檢查資料性別";
 				states = SystemInfo.DATA_FAIL;
 			}
 
@@ -131,8 +139,16 @@ public class MemberController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			states = SystemInfo.DATA_FAIL;
+			msg = SystemInfo.SYS_MESSAGE_ERROR;
 		}
 
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("states", states);
+		map.put("msg", msg);
+
+		Gson gson = new Gson();
+
+		return gson.toJson(map);
 	}
 
 	/**
@@ -141,9 +157,29 @@ public class MemberController {
 	 * @param request
 	 * @return
 	 */
+	@ApiImplicitParams({ @ApiImplicitParam(paramType = "header", name = "Authorization", value = "JWT Token"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memName", value = "姓名", example = "Paul"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memAddress", value = "地址", example = "XX區XX路XXX巷XXX號XX樓"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memAge", value = "年齡", example = "33"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memArea", value = "地址縣市", example = "KEE"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memAssets", value = "年齡", example = "33"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "Date", name = "memBirthday", value = "生日", example = "1989-10-10"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memAlcohol", value = "飲酒習慣", example = "1"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memDep", value = "會員自述", example = "我有很多錢$$$"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memEdu", value = "教育程度(0：其他、1：高中、2：大學、3：碩士、4：博士)", example = "3"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memHeight", value = "身高", example = "175"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memWeight", value = "體重", example = "70"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memIncome", value = "財力1~5（基礎、進階、高級、最高、可商議）", example = "1"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memIsvip", value = "會員狀態（不填）"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memMarry", value = "婚姻狀況（0：未婚、1：已婚）", example = "1"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memNickname", value = "會員暱稱", example = "black"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memPhone", value = "電話號碼", example = "0912345678"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memSmoke", value = "抽菸習慣（0：不抽、1：偶爾、2：經常）", example = "2"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "phoneStates", value = "手機驗證狀態（不填）") })
 	@ApiOperation("填寫會員資料")
 	@PutMapping(value = "/user")
-	public String createAccountInfo(@RequestHeader("Authorization") String au, MemberInfoDTO memberInfoDTO) {
+	public String createAccountInfo(@RequestHeader("Authorization") String au,
+			@RequestBody MemberInfoDTO memberInfoDTO) {
 
 		String token = au.substring(7);
 		String memUuid = JwtTokenUtils.getJwtMemUuid(token); // 取得token
@@ -375,6 +411,10 @@ public class MemberController {
 		return cityDTOs;
 	}
 
+	@ApiImplicitParams({ @ApiImplicitParam(paramType = "header", name = "Authorization", value = "JWT Token"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memPhone", value = "電話號碼", example = "0919268790"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "otp", value = "（不填）"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "secret", value = "（不填）") })
 	@ApiOperation("發送OTP簡訊")
 	@PostMapping(value = "/OTP/sendOTP")
 	public String sendSMS(@RequestHeader("Authorization") String au, PhoneOtpDTO phoneOtpDTO) {
@@ -413,9 +453,13 @@ public class MemberController {
 		return gson.toJson(map);
 	}
 
+	@ApiImplicitParams({ @ApiImplicitParam(paramType = "header", name = "Authorization", value = "JWT Token"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memPhone", value = "電話號碼（不填）"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "otp", example = "354045"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "secret", example = "6NMG67YDLUWNXQ3W") })
 	@ApiOperation("驗證OTP簡訊")
 	@PostMapping(value = "/OTP/verifyOTP")
-	public String verifyOTP(@RequestHeader("Authorization") String au, PhoneOtpDTO phoneOtpDTO) {
+	public String verifyOTP(@RequestHeader("Authorization") String au,@RequestBody PhoneOtpDTO phoneOtpDTO) {
 		Gson gson = new Gson();
 		Map<String, String> map = new HashMap<String, String>();
 

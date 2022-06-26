@@ -1,20 +1,19 @@
 package com.sweetNet.controller;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alibaba.fastjson.JSONObject;
+import com.google.gson.Gson;
 import com.sweetNet.dto.LoginDTO;
 import com.sweetNet.dto.MemberDTO;
 import com.sweetNet.model.Member;
@@ -25,6 +24,8 @@ import com.sweetNet.until.JwtTokenUtils;
 import com.sweetNet.until.SystemInfo;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "LoginController")
@@ -42,17 +43,20 @@ public class LoginController {
 	 * @param request
 	 * @return JSONObject
 	 */
+	@ApiImplicitParams({
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memMail", value = "信箱", example = "test001@gmail.com"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memPwd", value = "密碼", example = "12345678") })
 	@ApiOperation("登入")
 	@PostMapping(value = "/login")
-	protected void doPost(LoginDTO loginDTO, HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	protected String doPost(@RequestBody LoginDTO loginDTO) throws ServletException, IOException {
 
-		response.setContentType("text/plain;charset=UTF-8");
-		JSONObject jsonParam = new JSONObject();
 		Member member = new Member();
-		String jsonStr = "";
 
-		try (PrintWriter out = response.getWriter()) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		String msg = SystemInfo.SYS_MESSAGE_SUCCESS;
+		String states = SystemInfo.DATA_OK;
+
+		try {
 
 			// 驗證信箱、密碼
 			String memMail = loginDTO.getMemMail();
@@ -76,30 +80,28 @@ public class LoginController {
 
 				String memUuid = member.getMemUuid();
 
-				HashMap<String, String> map = new HashMap<String, String>();
-				map.put("memUuid", memUuid);
+				HashMap<String, String> dataMap = new HashMap<String, String>();
+				dataMap.put("memUuid", memUuid);
 
-				String JWTtoken = JwtTokenUtils.generateToken(map); // 取得token
-
-				jsonParam.put("token", JWTtoken);
-				jsonParam.put("msg", "登入成功！");
-				jsonParam.put("status", SystemInfo.DATA_OK);
-				jsonStr = jsonParam.toJSONString();
-
-				out.println(jsonStr);
-			} else {
-
-				jsonParam.put("msg", "登入失敗 !  請檢查信箱與密碼是否輸入錯誤 !?");
-				jsonParam.put("status", SystemInfo.DATA_FAIL);
-				jsonStr = jsonParam.toJSONString();
-
-				out.println(jsonStr);
-
+				String JWTtoken = JwtTokenUtils.generateToken(dataMap); // 取得token
+				map.put("token", JWTtoken);
+			}else {
+				states = SystemInfo.DATA_FAIL;
+				msg = "登入失敗 !  請檢查信箱與密碼是否輸入錯誤 !?";
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			states = SystemInfo.DATA_FAIL;
+			msg = "登入失敗 !  請檢查信箱與密碼是否輸入錯誤 !?";
 		}
+
+		map.put("states", states);
+		map.put("msg", msg);
+
+		Gson gson = new Gson();
+
+		return gson.toJson(map);
 	}
 
 	public Member getMemberFromMemberDTO(MemberDTO memberDTO) {

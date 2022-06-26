@@ -129,7 +129,6 @@ public class AesHelper {
 	
 	public static void main(String[] args) {
 		String str = "admin";
-		System.out.println(AesHelper.decrypt(str));
 		System.out.println(AesHelper.encrypt(str));
 	}
 }
