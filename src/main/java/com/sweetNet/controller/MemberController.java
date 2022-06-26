@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import javax.security.auth.message.AuthException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import org.jboss.aerogear.security.otp.api.Base32;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +35,10 @@ import com.sweetNet.dto.MemberDTO;
 import com.sweetNet.dto.MemberInfoDTO;
 import com.sweetNet.dto.PhoneOtpDTO;
 import com.sweetNet.dto.SignUpDTO;
+import com.sweetNet.model.Images;
 import com.sweetNet.model.Member;
-import com.sweetNet.model.MemberImage;
-import com.sweetNet.repository.MemberImageRepository;
 import com.sweetNet.repository.MemberRepository;
-import com.sweetNet.service.MemberImageService;
+import com.sweetNet.service.ImagesService;
 import com.sweetNet.service.MemberService;
 import com.sweetNet.until.AesHelper;
 import com.sweetNet.until.JwtTokenUtils;
@@ -66,10 +66,8 @@ public class MemberController {
 	@Autowired
 	private MemberRepository memberRepository;
 	@Autowired
-	private MemberImageService memberImageService;
-	@Autowired
-	private MemberImageRepository memberImageRepository;
-	@Autowired
+	private ImagesService imagesService;
+
 	private static Boolean tokenCheck = false;
 
 	/**
@@ -79,19 +77,18 @@ public class MemberController {
 	 * @return JSONObject
 	 */
 	@ApiImplicitParams({
-			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memMail", value = "會員電子郵件", example = "sweetnet@gmail.com"),
-			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memPwd", value = "會員電子郵件", example = "12345678"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memMail", value = "會員電子郵件（）", example = "sweetnet@gmail.com"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memPwd", value = "會員電子郵件（需大於等於8碼）", example = "12345678"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memNickname", value = "會員暱稱", example = "black"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memDep", value = "會員自述", example = "我有很多錢$$$"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memSex", value = "性別（0：女生、1：男生）", example = "1") })
 	@ApiOperation("建立會員帳號")
 	@PostMapping(value = "/user")
-	public String createAccount(@RequestBody SignUpDTO signUpDTO) {
+	public String createAccount(@RequestBody @Valid SignUpDTO signUpDTO) {
 		Member member = new Member();
 		String msg = SystemInfo.SYS_MESSAGE_SUCCESS;
 		String states = SystemInfo.DATA_OK;
-		String mail_regex = "^\\w{1,63}@[a-zA-Z0-9]{2,63}\\.[a-zA-Z]{2,63}(\\.[a-zA-Z]{2,63})?$";
-		Pattern pattern = Pattern.compile(mail_regex);
+
 		try {
 
 			String memUuid = UUID.randomUUID().toString();
@@ -103,24 +100,7 @@ public class MemberController {
 
 			MemberDTO memberDTOcheck = memberService.findOneByEmail(memMail);
 			if (memberDTOcheck.getMemMail() != null) {
-				states = SystemInfo.DATA_FAIL;
-				msg = "此信箱已註冊過";
-			}
-
-			if (("").equals(memMail)) {
-				msg = "請檢察Email";
-				states = SystemInfo.DATA_FAIL;
-			} else if (!pattern.matcher(memMail).find()) {
-				msg = "Email格式不正確";
-				states = SystemInfo.DATA_FAIL;
-			} else if (("").equals(AesHelper.decrypt(memPwd)) || AesHelper.decrypt(memPwd).length() < 8) {
-				msg = "請檢查密碼";
-				states = SystemInfo.DATA_FAIL;
-			} else if (("").equals(memNickname)) {
-				msg = "請檢查暱稱";
-				states = SystemInfo.DATA_FAIL;
-			} else if (("").equals(memSex)) {
-				msg = "請檢查資料性別";
+				msg = SystemInfo.ALREADY_REGISTER;
 				states = SystemInfo.DATA_FAIL;
 			}
 
@@ -135,8 +115,8 @@ public class MemberController {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			states = SystemInfo.DATA_FAIL;
 			msg = SystemInfo.SYS_MESSAGE_ERROR;
+			states = SystemInfo.DATA_FAIL;
 		}
 
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -284,28 +264,33 @@ public class MemberController {
 	 */
 	@ApiOperation("顯示個人資料")
 	@GetMapping(value = "/user")
-	public MemberDTO getUserInfo(@RequestHeader("Authorization") String au) {
+	public List<Map<Object, Object>> getUserInfo(@RequestHeader("Authorization") String au) {
 		String token = au.substring(7);
 		String memUuid = JwtTokenUtils.getJwtMemUuid(token); // 取得token
 
 		MemberDTO memberDTO = new MemberDTO();
+
+		List<Map<Object, Object>> list = new ArrayList<Map<Object, Object>>();
 
 		try {
 
 			tokenCheck = JwtTokenUtils.validateToken(token);
 
 			if (tokenCheck) {
-
+				Map<Object, Object> map = new HashMap<Object, Object>();
 				memberDTO = memberService.findOneByUuid(memUuid);
 
-				List<MemberImage> memberImageList = memberImageRepository.findByMemUuid(memUuid);
-
+				Images images = imagesService.findByMemUuid(memUuid);
+				map.put("member", memberDTO);
+				map.put("images", images);
+				list.add(map);
+				System.out.println(list);
 			}
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
 		}
 
-		return memberDTO;
+		return list;
 	}
 
 	/**
@@ -316,10 +301,12 @@ public class MemberController {
 	 */
 	@ApiOperation("顯示會員資料 - 以登入會員的性別分類，男生只能看到女生、女生只能看到男生並加入以縣市搜尋")
 	@GetMapping(value = "/users/{city}")
-	public List<MemberDTO> getUserInfoByCity(@RequestHeader("Authorization") String au, @PathVariable String city) {
+	public List<Map<Object, Object>> getUserInfoByCity(@RequestHeader("Authorization") String au,
+			@PathVariable String city) {
+		List<Map<Object, Object>> result = new ArrayList<Map<Object, Object>>();
 		String token = au.substring(7);
-
 		List<MemberDTO> memberDTOs = new ArrayList<MemberDTO>();
+
 		try {
 
 			String memUuid = JwtTokenUtils.getJwtMemUuid(token);
@@ -339,10 +326,22 @@ public class MemberController {
 				} else if (memSex == 2) {
 					memSex = 1;
 					memberDTOs = memberService.findByMemSexAndMemArea(memSex, memArea);
+				} else if (memSex == 0) {
+					memberDTOs = memberService.findAll();
 				}
 
-				if (memSex == 0) {
-					memberDTOs = memberService.findAll();
+				for (MemberDTO member : memberDTOs) {
+					String uuid = member.getMemUuid();
+					Images images = imagesService.findByMemUuid(uuid);
+					Map<Object, Object> map = new HashMap<Object, Object>();
+					if (images != null && uuid.equals(images.getMemUuid())) {
+						map.put("images", images);
+					} else {
+						map.put("images", null);
+					}
+					map.put("member", member);
+
+					result.add(map);
 				}
 
 			}
@@ -350,7 +349,7 @@ public class MemberController {
 			e.printStackTrace();
 		}
 
-		return memberDTOs;
+		return result;
 	}
 
 	/**
@@ -361,8 +360,8 @@ public class MemberController {
 	 */
 	@ApiOperation("顯示會員資料 - 以登入會員的性別分類，男生只能看到女生、女生只能看到男生")
 	@GetMapping(value = "/users")
-	public List<MemberDTO> getUserInfoBySex(@RequestHeader("Authorization") String au) {
-
+	public List<Map<Object, Object>> getUserInfoBySex(@RequestHeader("Authorization") String au) {
+		List<Map<Object, Object>> result = new ArrayList<Map<Object, Object>>();
 		String token = au.substring(7);
 		List<MemberDTO> memberDTOs = new ArrayList<MemberDTO>();
 		try {
@@ -371,9 +370,6 @@ public class MemberController {
 			tokenCheck = JwtTokenUtils.validateToken(token);
 
 			if (tokenCheck) {
-
-				Member member = new Member();
-				member.setMemUuid(memUuid);
 
 				MemberDTO memberDTO = memberService.findOneByUuid(memUuid);
 
@@ -390,12 +386,25 @@ public class MemberController {
 					memberDTOs = memberService.findAll();
 				}
 
+				for (MemberDTO member : memberDTOs) {
+					String uuid = member.getMemUuid();
+					Images images = imagesService.findByMemUuid(uuid);
+					Map<Object, Object> map = new HashMap<Object, Object>();
+					if (images != null && uuid.equals(images.getMemUuid())) {
+						map.put("images", images);
+					} else {
+						map.put("images", null);
+					}
+					map.put("member", member);
+
+					result.add(map);
+				}
 			}
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
 		}
 
-		return memberDTOs;
+		return result;
 	}
 
 	@ApiImplicitParams({ @ApiImplicitParam(paramType = "header", name = "Authorization", value = "JWT Token"),
@@ -404,7 +413,7 @@ public class MemberController {
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "secret", value = "（不填）") })
 	@ApiOperation("發送OTP簡訊")
 	@PostMapping(value = "/OTP/sendOTP")
-	public String sendSMS(@RequestHeader("Authorization") String au, PhoneOtpDTO phoneOtpDTO) {
+	public String sendSMS(@RequestHeader("Authorization") String au, @RequestBody @Valid PhoneOtpDTO phoneOtpDTO) {
 		Gson gson = new Gson();
 		Map<String, String> map = new HashMap<String, String>();
 

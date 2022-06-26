@@ -9,6 +9,6 @@ public interface MemberImageService {
 	void save(MemberImage contact);
 
 	Iterable<MemberImage> findByUuid(String uuid);
-	
+
 	void saveSeq(MemberImage contact, int id);
 }
