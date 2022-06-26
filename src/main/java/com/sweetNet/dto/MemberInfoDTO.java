@@ -2,8 +2,6 @@ package com.sweetNet.dto;
 
 import java.io.Serializable;
 
-import com.alibaba.fastjson.JSONObject;
-
 public class MemberInfoDTO implements Serializable {
 
 	private String memNickname;
@@ -217,29 +215,6 @@ public class MemberInfoDTO implements Serializable {
 
 	public void setMemArea(String memArea) {
 		this.memArea = memArea;
-	}
-
-	public JSONObject toJson() {
-		JSONObject json = new JSONObject();
-
-		json.put("memNickname", memNickname);
-		json.put("memDep", memDep);
-		json.put("memName", memName);
-		json.put("memPhone", memPhone);
-		json.put("memBirthday", memBirthday);
-		json.put("memAge", memAge);
-		json.put("memAddress", memAddress);
-		json.put("memArea", memArea);
-		json.put("memHeight", memHeight);
-		json.put("memWeight", memWeight);
-		json.put("memEdu", memEdu);
-		json.put("memMarry", memMarry);
-		json.put("memAlcohol", memAlcohol);
-		json.put("memSmoke", memSmoke);
-		json.put("memIncome", memIncome);
-		json.put("memAssets", memAssets);
-		json.put("memIsvip", memIsvip);
-		return json;
 	}
 
 }
