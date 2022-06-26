@@ -106,7 +106,7 @@ public class LoginController {
 
 	public Member getMemberFromMemberDTO(MemberDTO memberDTO) {
 		Member member = new Member();
-		member.setMemAddress(memberDTO.getMemAddress());
+		member.setMemCountry(memberDTO.getMemCountry());
 		member.setMemAge(memberDTO.getMemAge());
 		member.setMemAlcohol(memberDTO.getMemAlcohol());
 		member.setMemArea(memberDTO.getMemArea());

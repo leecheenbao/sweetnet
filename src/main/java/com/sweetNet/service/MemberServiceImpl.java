@@ -80,7 +80,7 @@ public class MemberServiceImpl implements MemberService {
 
 	public Member getMemberFromMemberDTO(MemberDTO memberDTO) {
 		Member member = new Member();
-		member.setMemAddress(memberDTO.getMemAddress());
+		member.setMemCountry(memberDTO.getMemCountry());
 		member.setMemAge(memberDTO.getMemAge());
 		member.setMemAlcohol(memberDTO.getMemAlcohol());
 		member.setMemArea(memberDTO.getMemArea());
@@ -104,13 +104,14 @@ public class MemberServiceImpl implements MemberService {
 		member.setMemSta(memberDTO.getMemSta());
 		member.setMemUuid(memberDTO.getMemUuid());
 		member.setMemWeight(memberDTO.getMemWeight());
+		member.setMemAbout(memberDTO.getMemAbout());
 
 		return member;
 	}
 
 	public MemberDTO getMemberDTOFromMember(Member member) {
 		MemberDTO memberDTO = new MemberDTO();
-		memberDTO.setMemAddress(member.getMemAddress());
+		memberDTO.setMemCountry(member.getMemCountry());
 		memberDTO.setMemAge(member.getMemAge());
 		memberDTO.setMemAlcohol(member.getMemAlcohol());
 		memberDTO.setMemArea(member.getMemArea());
@@ -133,6 +134,7 @@ public class MemberServiceImpl implements MemberService {
 		memberDTO.setMemSta(member.getMemSta());
 		memberDTO.setMemUuid(member.getMemUuid());
 		memberDTO.setMemWeight(member.getMemWeight());
+		memberDTO.setMemAbout(member.getMemAbout());
 
 		memberDTO.setPhoneStates(member.getPhoneStates());
 		memberDTO.setMemPwd(member.getMemPwd());

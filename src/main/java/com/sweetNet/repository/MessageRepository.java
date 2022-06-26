@@ -9,4 +9,8 @@ import com.sweetNet.model.Message;
 public interface MessageRepository extends JpaRepository<Message, String> {
 	List<Message> findByRecId(String redId);
 
+	List<Message> findBySendId(String sendId);
+
+	Message findByMessageId(String messageId);
+
 }

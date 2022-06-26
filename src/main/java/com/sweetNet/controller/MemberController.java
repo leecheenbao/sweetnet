@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.google.gson.Gson;
 import com.infobip.sms.SendSmsBasic;
-import com.sweetNet.dto.CityDTO;
 import com.sweetNet.dto.MemberDTO;
 import com.sweetNet.dto.MemberInfoDTO;
 import com.sweetNet.dto.PhoneOtpDTO;
@@ -39,7 +38,6 @@ import com.sweetNet.model.Member;
 import com.sweetNet.model.MemberImage;
 import com.sweetNet.repository.MemberImageRepository;
 import com.sweetNet.repository.MemberRepository;
-import com.sweetNet.service.CityService;
 import com.sweetNet.service.MemberImageService;
 import com.sweetNet.service.MemberService;
 import com.sweetNet.until.AesHelper;
@@ -72,7 +70,6 @@ public class MemberController {
 	@Autowired
 	private MemberImageRepository memberImageRepository;
 	@Autowired
-	private CityService cityService;
 	private static Boolean tokenCheck = false;
 
 	/**
@@ -159,23 +156,24 @@ public class MemberController {
 	 */
 	@ApiImplicitParams({ @ApiImplicitParam(paramType = "header", name = "Authorization", value = "JWT Token"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memName", value = "姓名", example = "Paul"),
-			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memAddress", value = "地址", example = "XX區XX路XXX巷XXX號XX樓"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memCountry", value = "縣市", example = "基隆市"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memArea", value = "區域", example = "仁愛區"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memAge", value = "年齡", example = "33"),
-			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memArea", value = "地址縣市", example = "KEE"),
-			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memAssets", value = "年齡", example = "33"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memAssets", value = "財力1~5（基礎、進階、高級、最高、可商議）", example = "1"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "Date", name = "memBirthday", value = "生日", example = "1989-10-10"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memAlcohol", value = "飲酒習慣", example = "1"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memDep", value = "會員自述", example = "我有很多錢$$$"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memEdu", value = "教育程度(0：其他、1：高中、2：大學、3：碩士、4：博士)", example = "3"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memHeight", value = "身高", example = "175"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memWeight", value = "體重", example = "70"),
-			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memIncome", value = "財力1~5（基礎、進階、高級、最高、可商議）", example = "1"),
-			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memIsvip", value = "會員狀態（不填）"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memIncome", value = "預留欄位", example = "1"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memIsvip", value = "會員狀態（不填）", defaultValue = "0"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memMarry", value = "婚姻狀況（0：未婚、1：已婚）", example = "1"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memNickname", value = "會員暱稱", example = "black"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memPhone", value = "電話號碼", example = "0912345678"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memSmoke", value = "抽菸習慣（0：不抽、1：偶爾、2：經常）", example = "2"),
-			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "phoneStates", value = "手機驗證狀態（不填）") })
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memAbout", value = "關於自己", example = "ex:我家有20間房子"),
+			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "phoneStates", value = "手機驗證狀態（不填）", defaultValue = "0") })
 	@ApiOperation("填寫會員資料")
 	@PutMapping(value = "/user")
 	public String createAccountInfo(@RequestHeader("Authorization") String au,
@@ -197,8 +195,9 @@ public class MemberController {
 				String memPhone = memberInfoDTO.getMemPhone();
 				String memBirthday = memberInfoDTO.getMemBirthday();
 				Integer memAge = Integer.valueOf(memberInfoDTO.getMemAge());
-				String memAddress = memberInfoDTO.getMemAddress();
+				String memCountry = memberInfoDTO.getMemCountry();
 				String memArea = memberInfoDTO.getMemArea();
+				String memAbout = memberInfoDTO.getMemAbout();
 				Integer memHeight = Integer.valueOf(memberInfoDTO.getMemHeight());
 				Integer memWeight = Integer.valueOf(memberInfoDTO.getMemWeight());
 				Integer memEdu = Integer.valueOf(memberInfoDTO.getMemEdu());
@@ -242,7 +241,7 @@ public class MemberController {
 				member.setMemPhone(memPhone);
 				member.setMemBirthday(memBirthday);
 				member.setMemAge(memAge);
-				member.setMemAddress(memAddress);
+				member.setMemCountry(memCountry);
 				member.setMemArea(memArea);
 				member.setMemHeight(memHeight);
 				member.setMemWeight(memWeight);
@@ -255,6 +254,7 @@ public class MemberController {
 				member.setMemIsvip(memIsvip);
 				member.setMemRdate(mem_rdate);
 				member.setMemSta(memSta);
+				member.setMemAbout(memAbout);
 				memberService.save(member);
 				states = SystemInfo.DATA_OK;
 				msg = SystemInfo.SYS_MESSAGE_SUCCESS;
@@ -398,19 +398,6 @@ public class MemberController {
 		return memberDTOs;
 	}
 
-	@ApiOperation("取得縣市資料")
-	@GetMapping(value = "/country")
-	public List<CityDTO> getCountry() {
-		List<CityDTO> cityDTOs = null;
-		try {
-			cityDTOs = cityService.findAll();
-			System.out.println(cityDTOs);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return cityDTOs;
-	}
-
 	@ApiImplicitParams({ @ApiImplicitParam(paramType = "header", name = "Authorization", value = "JWT Token"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memPhone", value = "電話號碼", example = "0919268790"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "otp", value = "（不填）"),
@@ -459,7 +446,7 @@ public class MemberController {
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "secret", example = "6NMG67YDLUWNXQ3W") })
 	@ApiOperation("驗證OTP簡訊")
 	@PostMapping(value = "/OTP/verifyOTP")
-	public String verifyOTP(@RequestHeader("Authorization") String au,@RequestBody PhoneOtpDTO phoneOtpDTO) {
+	public String verifyOTP(@RequestHeader("Authorization") String au, @RequestBody PhoneOtpDTO phoneOtpDTO) {
 		Gson gson = new Gson();
 		Map<String, String> map = new HashMap<String, String>();
 

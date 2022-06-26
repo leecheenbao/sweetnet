@@ -7,8 +7,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.alibaba.fastjson.JSONObject;
-
 @Entity
 @Table(name = "MEMBER")
 public class Member implements Serializable {
@@ -51,8 +49,8 @@ public class Member implements Serializable {
 	@Column(name = "memAge")
 	private Integer memAge;
 
-	@Column(name = "memAddress")
-	private String memAddress;
+	@Column(name = "memCountry")
+	private String memCountry;
 
 	@Column(name = "memArea")
 	private String memArea;
@@ -93,12 +91,17 @@ public class Member implements Serializable {
 	@Column(name = "memSta")
 	private Integer memSta;
 
+	@Column(name = "memAbout")
+	private String memAbout;
+	
+
+
 	public Member() {
 		super();
 	}
 
 	public Member(String memUuid, String memMail, String memPwd, String memNickname, String memDep, Integer memSex,
-			String memName, String memPhone, Integer phoneStates, String memBirthday, String memAddress, String memArea,
+			String memName, String memPhone, Integer phoneStates, String memBirthday, String memCountry, String memArea,
 			Integer memAge, Integer memHeight, Integer memWeight, Integer memEdu, Integer memMarry, Integer memAlcohol,
 			Integer memSmoke, Integer memIncome, Integer memAssets, Integer memIsvip, String memRdate, Integer memLgd,
 			Integer memSta) {
@@ -114,7 +117,7 @@ public class Member implements Serializable {
 		this.phoneStates = phoneStates;
 		this.memBirthday = memBirthday;
 
-		this.memAddress = memAddress;
+		this.memCountry = memCountry;
 		this.memArea = memArea;
 		this.memAge = memAge;
 		this.memHeight = memHeight;
@@ -229,12 +232,12 @@ public class Member implements Serializable {
 		this.memAge = memAge;
 	}
 
-	public String getMemAddress() {
-		return memAddress;
+	public String getMemCountry() {
+		return memCountry;
 	}
 
-	public void setMemAddress(String memAddress) {
-		this.memAddress = memAddress;
+	public void setMemCountry(String memCountry) {
+		this.memCountry = memCountry;
 	}
 
 	public Integer getMemHeight() {
@@ -341,33 +344,12 @@ public class Member implements Serializable {
 		this.memArea = memArea;
 	}
 
-	public JSONObject toJson() {
-		JSONObject json = new JSONObject();
+	public String getMemAbout() {
+		return memAbout;
+	}
 
-		json.put("memUuid", memUuid);
-		json.put("memMail", memMail);
-		json.put("memNickname", memNickname);
-		json.put("memDep", memDep);
-		json.put("memSex", memSex);
-		json.put("memName", memName);
-		json.put("memPhone", memPhone);
-		json.put("memBirthday", memBirthday);
-		json.put("memAge", memAge);
-		json.put("memAddress", memAddress);
-		json.put("memArea", memArea);
-		json.put("memHeight", memHeight);
-		json.put("memWeight", memWeight);
-		json.put("memEdu", memEdu);
-		json.put("memMarry", memMarry);
-		json.put("memAlcohol", memAlcohol);
-		json.put("memSmoke", memSmoke);
-		json.put("memIncome", memIncome);
-		json.put("memAssets", memAssets);
-		json.put("memIsvip", memIsvip);
-		json.put("memRdate", memRdate);
-		json.put("memLgd", memLgd);
-		json.put("memSta", memSta);
-		return json;
+	public void setMemAbout(String memAbout) {
+		this.memAbout = memAbout;
 	}
 
 }

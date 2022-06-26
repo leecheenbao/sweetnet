@@ -1,6 +1,6 @@
 package com.sweetNet.dto;
 
-public class Message {
+public class MessageDTO {
 
 	private Integer id;
 
@@ -12,11 +12,11 @@ public class Message {
 
 	private Integer states;
 
-	public Message() {
+	public MessageDTO() {
 		super();
 	}
 
-	public Message(Integer id, String messageId, String sendId, String recId, Integer states) {
+	public MessageDTO(Integer id, String messageId, String sendId, String recId, Integer states) {
 		super();
 
 		this.id = id;

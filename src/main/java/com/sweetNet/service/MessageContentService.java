@@ -10,5 +10,5 @@ public interface MessageContentService {
 
 	void save(MessageContent contact);
 
-	MessageContent findByMsgId(String messageId);
+	MessageContent findByMessageId(String messageId);
 }

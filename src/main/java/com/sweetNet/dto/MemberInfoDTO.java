@@ -2,8 +2,6 @@ package com.sweetNet.dto;
 
 import java.io.Serializable;
 
-import com.alibaba.fastjson.JSONObject;
-
 public class MemberInfoDTO implements Serializable {
 
 	private String memNickname;
@@ -20,7 +18,7 @@ public class MemberInfoDTO implements Serializable {
 
 	private Integer memAge;
 
-	private String memAddress;
+	private String memCountry;
 
 	private String memArea;
 
@@ -42,12 +40,14 @@ public class MemberInfoDTO implements Serializable {
 
 	private Integer memIsvip;
 
+	private String memAbout;
+
 	public MemberInfoDTO() {
 		super();
 	}
 
 	public MemberInfoDTO(String memMail, String memPwd, String memNickname, String memDep, Integer memSex,
-			String memName, String memPhone, Integer phoneStates, String memBirthday, String memAddress, String memArea,
+			String memName, String memPhone, Integer phoneStates, String memBirthday, String memCountry, String memArea,
 			Integer memAge, Integer memHeight, Integer memWeight, Integer memEdu, Integer memMarry, Integer memAlcohol,
 			Integer memSmoke, Integer memIncome, Integer memAssets, Integer memIsvip, String memRdate, Integer memLgd,
 			Integer memSta) {
@@ -59,7 +59,7 @@ public class MemberInfoDTO implements Serializable {
 		this.phoneStates = phoneStates;
 		this.memBirthday = memBirthday;
 
-		this.memAddress = memAddress;
+		this.memCountry = memCountry;
 		this.memArea = memArea;
 		this.memAge = memAge;
 		this.memHeight = memHeight;
@@ -131,12 +131,12 @@ public class MemberInfoDTO implements Serializable {
 		this.memAge = memAge;
 	}
 
-	public String getMemAddress() {
-		return memAddress;
+	public String getMemCountry() {
+		return memCountry;
 	}
 
-	public void setMemAddress(String memAddress) {
-		this.memAddress = memAddress;
+	public void setMemCountry(String memCountry) {
+		this.memCountry = memCountry;
 	}
 
 	public Integer getMemHeight() {
@@ -219,27 +219,11 @@ public class MemberInfoDTO implements Serializable {
 		this.memArea = memArea;
 	}
 
-	public JSONObject toJson() {
-		JSONObject json = new JSONObject();
-
-		json.put("memNickname", memNickname);
-		json.put("memDep", memDep);
-		json.put("memName", memName);
-		json.put("memPhone", memPhone);
-		json.put("memBirthday", memBirthday);
-		json.put("memAge", memAge);
-		json.put("memAddress", memAddress);
-		json.put("memArea", memArea);
-		json.put("memHeight", memHeight);
-		json.put("memWeight", memWeight);
-		json.put("memEdu", memEdu);
-		json.put("memMarry", memMarry);
-		json.put("memAlcohol", memAlcohol);
-		json.put("memSmoke", memSmoke);
-		json.put("memIncome", memIncome);
-		json.put("memAssets", memAssets);
-		json.put("memIsvip", memIsvip);
-		return json;
+	public String getMemAbout() {
+		return memAbout;
 	}
 
+	public void setMemAbout(String memAbout) {
+		this.memAbout = memAbout;
+	}
 }

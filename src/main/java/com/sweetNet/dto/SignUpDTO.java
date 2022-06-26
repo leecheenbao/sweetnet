@@ -4,16 +4,23 @@ import java.io.Serializable;
 
 import com.alibaba.fastjson.JSONObject;
 
+import io.swagger.annotations.ApiModelProperty;
+
 public class SignUpDTO implements Serializable {
 
+	@ApiModelProperty("電子信箱")
 	private String memMail;
 
+	@ApiModelProperty("密碼")
 	private String memPwd;
 
+	@ApiModelProperty("暱稱")
 	private String memNickname;
 
+	@ApiModelProperty("一句話描述自己")
 	private String memDep;
 
+	@ApiModelProperty("性別")
 	private Integer memSex;
 
 	public SignUpDTO() {

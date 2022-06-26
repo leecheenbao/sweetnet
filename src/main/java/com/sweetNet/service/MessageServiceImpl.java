@@ -1,10 +1,8 @@
 package com.sweetNet.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import com.sweetNet.model.Message;
@@ -27,16 +25,17 @@ public class MessageServiceImpl implements MessageService {
 
 	@Override
 	public Message findByMsgId(String messageId) {
+		return messageRepository.findByMessageId(messageId);
+	}
 
-		Message m = new Message();
-		m.setMessageId(messageId);
+	@Override
+	public List<Message> findByRecId(String redId) {
+		return messageRepository.findByRecId(redId);
+	}
 
-		Example<Message> example = Example.of(m);
-		Optional<Message> mOptional = messageRepository.findOne(example);
-		if (mOptional.isPresent())
-			m = mOptional.orElseThrow(null);
-
-		return m;
+	@Override
+	public List<Message> findBySendId(String sendId) {
+		return messageRepository.findBySendId(sendId);
 	}
 
 }
