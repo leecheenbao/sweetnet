@@ -1,7 +1,5 @@
 package com.sweetNet.model;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -9,12 +7,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "MEMBER")
-public class Member implements Serializable {
-
-	/**
-	 *
-	 */
-	private static long serialVersionUID = 1L;
+public class Member {
 
 	@Id
 	@Column(name = "memUuid")
@@ -93,8 +86,12 @@ public class Member implements Serializable {
 
 	@Column(name = "memAbout")
 	private String memAbout;
-	
 
+	@Column(name = "memBody")
+	private Integer memBody;
+
+	@Column(name = "memPattern")
+	private Integer memPattern;
 
 	public Member() {
 		super();
@@ -104,7 +101,7 @@ public class Member implements Serializable {
 			String memName, String memPhone, Integer phoneStates, String memBirthday, String memCountry, String memArea,
 			Integer memAge, Integer memHeight, Integer memWeight, Integer memEdu, Integer memMarry, Integer memAlcohol,
 			Integer memSmoke, Integer memIncome, Integer memAssets, Integer memIsvip, String memRdate, Integer memLgd,
-			Integer memSta) {
+			Integer memSta, String memAbout, Integer memBody, Integer memPattern) {
 		super();
 		this.memUuid = memUuid;
 		this.memMail = memMail;
@@ -134,14 +131,25 @@ public class Member implements Serializable {
 		this.memRdate = memRdate;
 		this.memLgd = memLgd;
 		this.memSta = memSta;
+		this.memAbout = memAbout;
+		this.memPattern = memPattern;
+		this.memBody = memBody;
 	}
 
-	public static long getSerialVersionUID() {
-		return serialVersionUID;
+	public Integer getMemBody() {
+		return memBody;
 	}
 
-	public static void setSerialVersionUID(long serialVersionUID) {
-		Member.serialVersionUID = serialVersionUID;
+	public void setMemBody(Integer memBody) {
+		this.memBody = memBody;
+	}
+
+	public Integer getMemPattern() {
+		return memPattern;
+	}
+
+	public void setMemPattern(Integer memPattern) {
+		this.memPattern = memPattern;
 	}
 
 	public String getMemUuid() {

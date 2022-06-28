@@ -1,8 +1,6 @@
 package com.sweetNet.dto;
 
-import java.io.Serializable;
-
-public class MemberInfoDTO implements Serializable {
+public class MemberInfoDTO {
 
 	private String memNickname;
 
@@ -42,6 +40,10 @@ public class MemberInfoDTO implements Serializable {
 
 	private String memAbout;
 
+	private Integer memBody;
+
+	private Integer memPattern;
+
 	public MemberInfoDTO() {
 		super();
 	}
@@ -50,7 +52,7 @@ public class MemberInfoDTO implements Serializable {
 			String memName, String memPhone, Integer phoneStates, String memBirthday, String memCountry, String memArea,
 			Integer memAge, Integer memHeight, Integer memWeight, Integer memEdu, Integer memMarry, Integer memAlcohol,
 			Integer memSmoke, Integer memIncome, Integer memAssets, Integer memIsvip, String memRdate, Integer memLgd,
-			Integer memSta) {
+			Integer memSta, Integer memBody, Integer memPattern, String memAbout) {
 		super();
 		this.memNickname = memNickname;
 		this.memDep = memDep;
@@ -65,14 +67,15 @@ public class MemberInfoDTO implements Serializable {
 		this.memHeight = memHeight;
 		this.memWeight = memWeight;
 		this.memEdu = memEdu;
-
 		this.memMarry = memMarry;
 		this.memAlcohol = memAlcohol;
 		this.memSmoke = memSmoke;
 		this.memIncome = memIncome;
 		this.memAssets = memAssets;
-
 		this.memIsvip = memIsvip;
+		this.memAbout = memAbout;
+		this.memBody = memBody;
+		this.memPattern = memPattern;
 	}
 
 	public String getMemNickname() {
@@ -97,6 +100,22 @@ public class MemberInfoDTO implements Serializable {
 
 	public void setMemName(String memName) {
 		this.memName = memName;
+	}
+
+	public Integer getMemBody() {
+		return memBody;
+	}
+
+	public void setMemBody(Integer memBody) {
+		this.memBody = memBody;
+	}
+
+	public Integer getMemPattern() {
+		return memPattern;
+	}
+
+	public void setMemPattern(Integer memPattern) {
+		this.memPattern = memPattern;
 	}
 
 	public String getMemPhone() {

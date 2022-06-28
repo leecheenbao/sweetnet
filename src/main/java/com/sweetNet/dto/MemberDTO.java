@@ -1,8 +1,6 @@
 package com.sweetNet.dto;
 
-import java.io.Serializable;
-
-public class MemberDTO implements Serializable {
+public class MemberDTO {
 
 	private String memUuid;
 
@@ -55,6 +53,9 @@ public class MemberDTO implements Serializable {
 	private Integer memSta;
 
 	private String memAbout;
+	private Integer memBody;
+
+	private Integer memPattern;
 
 	public MemberDTO() {
 		super();
@@ -64,7 +65,7 @@ public class MemberDTO implements Serializable {
 			String memPhone, Integer phoneStates, String memBirthday, String memCountry, String memArea, Integer memAge,
 			Integer memHeight, Integer memWeight, Integer memEdu, Integer memMarry, Integer memAlcohol,
 			Integer memSmoke, Integer memIncome, Integer memAssets, Integer memIsvip, String memRdate, Integer memLgd,
-			Integer memSta) {
+			Integer memSta, Integer memBody, Integer memPattern, String memAbout) {
 		super();
 		this.memMail = memMail;
 		this.memPwd = memPwd;
@@ -93,6 +94,25 @@ public class MemberDTO implements Serializable {
 		this.memRdate = memRdate;
 		this.memLgd = memLgd;
 		this.memSta = memSta;
+		this.memAbout = memAbout;
+		this.memBody = memBody;
+		this.memPattern = memPattern;
+	}
+
+	public Integer getMemBody() {
+		return memBody;
+	}
+
+	public void setMemBody(Integer memBody) {
+		this.memBody = memBody;
+	}
+
+	public Integer getMemPattern() {
+		return memPattern;
+	}
+
+	public void setMemPattern(Integer memPattern) {
+		this.memPattern = memPattern;
 	}
 
 	public String getMemUuid() {

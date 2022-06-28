@@ -2,7 +2,10 @@ package com.sweetNet.until;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.Base64;
+import java.util.Enumeration;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -79,8 +82,6 @@ public class Until {
 		String regex = "^\\w{1,63}@[a-zA-Z0-9]{2,63}\\.[a-zA-Z]{2,63}(\\.[a-zA-Z]{2,63})?$";
 	}
 
-
-
 	public static String encodeBase64(byte[] encodeMe) {
 		byte[] encodedBytes = Base64.getEncoder().encode(encodeMe);
 		return new String(encodedBytes);
@@ -99,12 +100,29 @@ public class Until {
 	private static final String RECIPIENT = "886919268790";
 	private static final String MESSAGE_TEXT = "This is a sample message";
 
-	public static void main(String arg[]) {
+	public void getInterfaces() {
+		try {
+			Enumeration e = NetworkInterface.getNetworkInterfaces();
 
-		String bodyJson = String.format(
-				"{\"messages\":[{\"from\":\"%s\",\"destinations\":[{\"to\":\"%s\"}],\"text\":\"%s\"}]}", SENDER,
-				RECIPIENT, MESSAGE_TEXT);
+			while (e.hasMoreElements()) {
+				NetworkInterface netface = (NetworkInterface) e.nextElement();
+				System.out.println("Net interface: " + netface.getName());
 
+				Enumeration e2 = netface.getInetAddresses();
+
+				while (e2.hasMoreElements()) {
+					InetAddress ip = (InetAddress) e2.nextElement();
+					System.out.println("IP address: " + ip.toString());
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("e: " + e);
+		}
+	}
+
+	public static void main(String[] args) {
+		Until u = new Until();
+		u.getInterfaces();
 	}
 
 }
