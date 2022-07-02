@@ -16,9 +16,9 @@ import com.google.gson.Gson;
 import com.sweetNet.dto.ImagesDTO;
 import com.sweetNet.model.Images;
 import com.sweetNet.service.ImagesService;
+import com.sweetNet.until.ConfigInfo;
 import com.sweetNet.until.ImageUntil;
 import com.sweetNet.until.JwtTokenUtils;
-import com.sweetNet.until.ConfigInfo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -62,12 +62,6 @@ public class ImageController {
 						Boolean op = (boolean) list.get(1);
 						if (op) {
 
-//							InetAddress address = InetAddress.getLocalHost();
-//							String hostAddress = address.getHostAddress();
-
-//							imageUrl = (localIP + imageUrl).replace("\\", "/");
-//							http://35.189.162.115:8083/sweetNetImg/images/e8bd588c-8bc0-4b06-bf14-db8049c821de/1656445058028.png
-//							System.out.println(imageUrl.replace("\\", "/"));
 							Images images = new Images();
 							Images checkimages = imagesService.findByMemUuid(memUuid);
 							if (checkimages != null) {

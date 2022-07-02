@@ -11,7 +11,7 @@ public class SignUpDTO {
 	@Email
 	private String memMail;
 
-	@ApiModelProperty("密碼")
+	@ApiModelProperty("密碼-密碼必須為長度6~16位碼大小寫英文加數字")
 	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[\\w]{6,16}$", message = "密碼必須為長度6~16位碼大小寫英文加數字")
 	private String memPwd;
 

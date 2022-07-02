@@ -173,21 +173,25 @@ public class MemberController {
 			tokenCheck = JwtTokenUtils.validateToken(token);
 
 			if (tokenCheck) {
+				
 				String memName = memberInfoDTO.getMemName();
 				String memNickname = memberInfoDTO.getMemNickname();
 				String memPhone = memberInfoDTO.getMemPhone();
 				String memBirthday = memberInfoDTO.getMemBirthday();
-				Integer memAge = Integer.valueOf(memberInfoDTO.getMemAge());
 				String memCountry = memberInfoDTO.getMemCountry();
 				String memArea = memberInfoDTO.getMemArea();
 				String memAbout = memberInfoDTO.getMemAbout();
+				String memDep = memberInfoDTO.getMemDep();
 				Integer memHeight = Integer.valueOf(memberInfoDTO.getMemHeight());
 				Integer memWeight = Integer.valueOf(memberInfoDTO.getMemWeight());
-				Integer memEdu = Integer.valueOf(memberInfoDTO.getMemEdu());
-				Integer memMarry = Integer.valueOf(memberInfoDTO.getMemEdu());
-				Integer memAlcohol = Integer.valueOf(memberInfoDTO.getMemAlcohol());
-				Integer memSmoke = Integer.valueOf(memberInfoDTO.getMemSmoke());
-				Integer memIncome = Integer.valueOf(memberInfoDTO.getMemIncome());
+//				Integer memEdu = Integer.valueOf(memberInfoDTO.getMemEdu());
+//				Integer memMarry = Integer.valueOf(memberInfoDTO.getMemEdu());
+//				Integer memAlcohol = Integer.valueOf(memberInfoDTO.getMemAlcohol());
+//				Integer memSmoke = Integer.valueOf(memberInfoDTO.getMemSmoke());
+//				Integer memIncome = Integer.valueOf(memberInfoDTO.getMemIncome());
+				Integer memBody = Integer.valueOf(memberInfoDTO.getMemBody());
+				
+				Integer memPattern = Integer.valueOf(memberInfoDTO.getMemPattern());
 				Integer memAssets = Integer.valueOf(memberInfoDTO.getMemAssets());
 				Integer memIsvip = 0;
 
@@ -202,19 +206,17 @@ public class MemberController {
 				String mem_rdate = dtf.format(dateObj);
 				Integer memSta = 1;
 
-				if (("").equals(memPhone) || !pattern.matcher(memPhone).find()) {
-					states = ConfigInfo.DATA_FAIL;
-					msg = ConfigInfo.ERROR_PHONE;
-				}
+//				if (("").equals(memPhone) || !pattern.matcher(memPhone).find()) {
+//					states = ConfigInfo.DATA_FAIL;
+//					msg = ConfigInfo.ERROR_PHONE;
+//				}
 				Member member = new Member();
 				member.setMemUuid(memUuid);
 				MemberDTO memberDTO = memberService.findOneByUuid(memUuid);
-
+				
 				member.setMemPwd(memberDTO.getMemPwd());
 				member.setMemMail(memberDTO.getMemMail());
-				member.setMemPhone(memberDTO.getMemPhone());
 				member.setMemSex(memberDTO.getMemSex());
-				member.setMemDep(memberDTO.getMemDep());
 				member.setMemLgd(memberDTO.getMemLgd());
 				member.setPhoneStates(memberDTO.getPhoneStates());
 
@@ -223,21 +225,24 @@ public class MemberController {
 				member.setMemNickname(memNickname);
 				member.setMemPhone(memPhone);
 				member.setMemBirthday(memBirthday);
-				member.setMemAge(memAge);
 				member.setMemCountry(memCountry);
 				member.setMemArea(memArea);
 				member.setMemHeight(memHeight);
 				member.setMemWeight(memWeight);
-				member.setMemEdu(memEdu);
-				member.setMemMarry(memMarry);
-				member.setMemAlcohol(memAlcohol);
-				member.setMemSmoke(memSmoke);
-				member.setMemIncome(memIncome);
+//				member.setMemEdu(memEdu);
+//				member.setMemMarry(memMarry);
+//				member.setMemAlcohol(memAlcohol);
+//				member.setMemSmoke(memSmoke);
+//				member.setMemIncome(memIncome);
+				member.setMemBody(memBody);
+				member.setMemPattern(memPattern);
 				member.setMemAssets(memAssets);
 				member.setMemIsvip(memIsvip);
 				member.setMemRdate(mem_rdate);
 				member.setMemSta(memSta);
 				member.setMemAbout(memAbout);
+				member.setMemDep(memDep);
+				
 				memberService.save(member);
 				states = ConfigInfo.DATA_OK;
 				msg = ConfigInfo.SYS_MESSAGE_SUCCESS;

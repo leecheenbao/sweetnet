@@ -16,12 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.gson.Gson;
 import com.sweetNet.dto.LoginDTO;
 import com.sweetNet.dto.MemberDTO;
+import com.sweetNet.dto.SignUpDTO;
 import com.sweetNet.model.Member;
 import com.sweetNet.repository.MemberRepository;
 import com.sweetNet.service.MemberService;
 import com.sweetNet.until.AesHelper;
-import com.sweetNet.until.JwtTokenUtils;
 import com.sweetNet.until.ConfigInfo;
+import com.sweetNet.until.JwtTokenUtils;
+import com.sweetNet.until.SendMail;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -48,7 +50,7 @@ public class LoginController {
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memPwd", value = "密碼", example = "12345678") })
 	@ApiOperation("登入")
 	@PostMapping(value = "/login")
-	protected String doPost(@RequestBody LoginDTO loginDTO) throws ServletException, IOException {
+	protected String login(@RequestBody LoginDTO loginDTO) throws ServletException, IOException {
 
 		Member member = new Member();
 
@@ -85,7 +87,7 @@ public class LoginController {
 
 				String JWTtoken = JwtTokenUtils.generateToken(dataMap); // 取得token
 				map.put("token", JWTtoken);
-			}else {
+			} else {
 				states = ConfigInfo.DATA_FAIL;
 				msg = "登入失敗 !  請檢查信箱與密碼是否輸入錯誤 !?";
 			}
@@ -94,6 +96,35 @@ public class LoginController {
 			e.printStackTrace();
 			states = ConfigInfo.DATA_FAIL;
 			msg = "登入失敗 !  請檢查信箱與密碼是否輸入錯誤 !?";
+		}
+
+		map.put("states", states);
+		map.put("msg", msg);
+
+		Gson gson = new Gson();
+
+		return gson.toJson(map);
+	}
+
+	@ApiOperation("忘記密碼")
+	@PostMapping(value = "/forget")
+	protected String forget(@RequestBody SignUpDTO signUpDTO) throws ServletException, IOException {
+		Map<String, Object> map = new HashMap<String, Object>();
+		String msg = ConfigInfo.SYS_MESSAGE_SUCCESS;
+		String states = ConfigInfo.DATA_OK;
+
+		try {
+
+			String mail = signUpDTO.getMemMail();
+			StringBuffer subject = new StringBuffer();
+			subject.append("忘記密碼");
+			StringBuffer content = new StringBuffer();
+			content.append("請點擊下方連結盡速更改密碼");
+
+			SendMail sendMail = new SendMail();
+			sendMail.sendMail_SugarDaddy(String.valueOf(subject), String.valueOf(content), mail);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		map.put("states", states);
