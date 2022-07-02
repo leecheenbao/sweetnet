@@ -40,11 +40,11 @@
 			<optional>true</optional>
 		</dependency>
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.springframework.boot</groupId> -->
-<!-- 			<artifactId>spring-boot-starter-tomcat</artifactId> -->
-<!-- 			<scope>provided</scope> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.springframework.boot</groupId> -->
+		<!-- <artifactId>spring-boot-starter-tomcat</artifactId> -->
+		<!-- <scope>provided</scope> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
@@ -128,13 +128,13 @@
 		</dependency>
 
 
-		<!-- 电话号码工具类 -->
+		<!-- 電話號碼工具 -->
 		<dependency>
 			<groupId>com.googlecode.libphonenumber</groupId>
 			<artifactId>geocoder</artifactId>
 			<version>2.12</version>
 		</dependency>
-		<!-- 电话号码工具类 END -->
+		<!-- 電話號碼工具 END -->
 
 		<!-- https://mvnrepository.com/artifact/org.jboss.aerogear/aerogear-otp-java -->
 		<dependency>
@@ -142,6 +142,14 @@
 			<artifactId>aerogear-otp-java</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-gmail -->
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-gmail</artifactId>
+			<version>v1-rev110-1.25.0</version>
+		</dependency>
+
 
 	</dependencies>
 

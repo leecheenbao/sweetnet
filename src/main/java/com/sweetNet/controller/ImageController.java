@@ -1,6 +1,5 @@
 package com.sweetNet.controller;
 
-import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,7 @@ import com.sweetNet.model.Images;
 import com.sweetNet.service.ImagesService;
 import com.sweetNet.until.ImageUntil;
 import com.sweetNet.until.JwtTokenUtils;
-import com.sweetNet.until.SystemInfo;
+import com.sweetNet.until.ConfigInfo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,6 +29,9 @@ import io.swagger.annotations.ApiOperation;
 public class ImageController {
 	@Value("${filePath}")
 	private String filePath;
+
+	@Value("${localIP}")
+	private String localIP;
 
 	private static Boolean tokenCheck = false;
 
@@ -45,8 +47,8 @@ public class ImageController {
 		String token = au.substring(7);
 		String memUuid = JwtTokenUtils.getJwtMemUuid(token);
 
-		String msg = SystemInfo.SYS_MESSAGE_SUCCESS;
-		String states = SystemInfo.DATA_OK;
+		String msg = ConfigInfo.SYS_MESSAGE_SUCCESS;
+		String states = ConfigInfo.DATA_OK;
 		try {
 			tokenCheck = JwtTokenUtils.validateToken(token);
 			if (tokenCheck) {
@@ -54,18 +56,18 @@ public class ImageController {
 				int count = 1;
 				for (ImagesDTO imagesDTO : imagesDTOs) {
 					if (imagesDTO.getImage() != null) {
-						List<Object> list = ImageUntil.GenerateImage(imagesDTO.getImage(), filePath, memUuid);
+						List<Object> list = ImageUntil.GenerateImage(imagesDTO.getImage(), filePath, localIP, memUuid);
 
 						String imageUrl = String.valueOf(list.get(0));
 						Boolean op = (boolean) list.get(1);
 						if (op) {
 
-							InetAddress address = InetAddress.getLocalHost();
-							String hostAddress = address.getHostAddress();
+//							InetAddress address = InetAddress.getLocalHost();
+//							String hostAddress = address.getHostAddress();
 
-							imageUrl = ("http://" + hostAddress + ":8083" + imageUrl).replace("\\", "/");
-
-							System.out.println(imageUrl.replace("\\", "/"));
+//							imageUrl = (localIP + imageUrl).replace("\\", "/");
+//							http://35.189.162.115:8083/sweetNetImg/images/e8bd588c-8bc0-4b06-bf14-db8049c821de/1656445058028.png
+//							System.out.println(imageUrl.replace("\\", "/"));
 							Images images = new Images();
 							Images checkimages = imagesService.findByMemUuid(memUuid);
 							if (checkimages != null) {
@@ -101,8 +103,8 @@ public class ImageController {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			msg = SystemInfo.SYS_MESSAGE_ERROR;
-			states = SystemInfo.DATA_FAIL;
+			msg = ConfigInfo.SYS_MESSAGE_ERROR;
+			states = ConfigInfo.DATA_FAIL;
 		}
 
 		Map<String, Object> map = new HashMap<String, Object>();

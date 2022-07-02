@@ -41,9 +41,10 @@ import com.sweetNet.repository.MemberRepository;
 import com.sweetNet.service.ImagesService;
 import com.sweetNet.service.MemberService;
 import com.sweetNet.until.AesHelper;
+import com.sweetNet.until.ConfigInfo;
 import com.sweetNet.until.JwtTokenUtils;
 import com.sweetNet.until.PhoneUtil;
-import com.sweetNet.until.SystemInfo;
+import com.sweetNet.until.SendMail;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -86,8 +87,8 @@ public class MemberController {
 	@PostMapping(value = "/user")
 	public String createAccount(@RequestBody @Valid SignUpDTO signUpDTO) {
 		Member member = new Member();
-		String msg = SystemInfo.SYS_MESSAGE_SUCCESS;
-		String states = SystemInfo.DATA_OK;
+		String msg = ConfigInfo.SYS_MESSAGE_SUCCESS;
+		String states = ConfigInfo.DATA_OK;
 
 		try {
 
@@ -100,11 +101,11 @@ public class MemberController {
 
 			MemberDTO memberDTOcheck = memberService.findOneByEmail(memMail);
 			if (memberDTOcheck.getMemMail() != null) {
-				msg = SystemInfo.ALREADY_REGISTER;
-				states = SystemInfo.DATA_FAIL;
+				msg = ConfigInfo.ALREADY_REGISTER;
+				states = ConfigInfo.DATA_FAIL;
 			}
 
-			if (states.equals(SystemInfo.DATA_OK)) {
+			if (states.equals(ConfigInfo.DATA_OK)) {
 				member.setMemUuid(memUuid);
 				member.setMemMail(memMail);
 				member.setMemPwd(memPwd);
@@ -112,11 +113,13 @@ public class MemberController {
 				member.setMemDep(memDep);
 				member.setMemSex(memSex);
 				memberService.save(member);
+				SendMail sendMail = new SendMail();
+				sendMail.sendMail_SugarDaddy(ConfigInfo.MAIL_SUBTITLE_SINGN, ConfigInfo.MAIL_CONTENT, memMail);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			msg = SystemInfo.SYS_MESSAGE_ERROR;
-			states = SystemInfo.DATA_FAIL;
+			msg = ConfigInfo.SYS_MESSAGE_ERROR;
+			states = ConfigInfo.DATA_FAIL;
 		}
 
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -162,9 +165,9 @@ public class MemberController {
 		String token = au.substring(7);
 		String memUuid = JwtTokenUtils.getJwtMemUuid(token); // 取得token
 
-		String states = SystemInfo.DATA_ERR_SYS;
+		String states = ConfigInfo.DATA_ERR_SYS;
 		String msg = "";
-		Pattern pattern = Pattern.compile(SystemInfo.PHONE_REGEX);
+		Pattern pattern = Pattern.compile(ConfigInfo.PHONE_REGEX);
 		try {
 
 			tokenCheck = JwtTokenUtils.validateToken(token);
@@ -200,8 +203,8 @@ public class MemberController {
 				Integer memSta = 1;
 
 				if (("").equals(memPhone) || !pattern.matcher(memPhone).find()) {
-					states = SystemInfo.DATA_FAIL;
-					msg = SystemInfo.ERROR_PHONE;
+					states = ConfigInfo.DATA_FAIL;
+					msg = ConfigInfo.ERROR_PHONE;
 				}
 				Member member = new Member();
 				member.setMemUuid(memUuid);
@@ -236,14 +239,14 @@ public class MemberController {
 				member.setMemSta(memSta);
 				member.setMemAbout(memAbout);
 				memberService.save(member);
-				states = SystemInfo.DATA_OK;
-				msg = SystemInfo.SYS_MESSAGE_SUCCESS;
+				states = ConfigInfo.DATA_OK;
+				msg = ConfigInfo.SYS_MESSAGE_SUCCESS;
 			} else {
 
 			}
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
-			states = SystemInfo.DATA_FAIL;
+			states = ConfigInfo.DATA_FAIL;
 			msg = e.getMessage();
 		}
 
@@ -418,8 +421,8 @@ public class MemberController {
 		Map<String, String> map = new HashMap<String, String>();
 
 		String token = au.substring(7);
-		String msg = SystemInfo.SYS_MESSAGE_SUCCESS;
-		String states = SystemInfo.DATA_OK;
+		String msg = ConfigInfo.SYS_MESSAGE_SUCCESS;
+		String states = ConfigInfo.DATA_OK;
 
 		try {
 
@@ -439,7 +442,7 @@ public class MemberController {
 
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
-			states = SystemInfo.DATA_FAIL;
+			states = ConfigInfo.DATA_FAIL;
 			msg = e.getMessage();
 		}
 
@@ -460,8 +463,8 @@ public class MemberController {
 		Map<String, String> map = new HashMap<String, String>();
 
 		String token = au.substring(7);
-		String msg = SystemInfo.SYS_MESSAGE_SUCCESS;
-		String states = SystemInfo.DATA_OK;
+		String msg = ConfigInfo.SYS_MESSAGE_SUCCESS;
+		String states = ConfigInfo.DATA_OK;
 
 		try {
 			tokenCheck = JwtTokenUtils.validateToken(token);
@@ -487,7 +490,7 @@ public class MemberController {
 
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
-			states = SystemInfo.DATA_FAIL;
+			states = ConfigInfo.DATA_FAIL;
 			msg = e.getMessage();
 		}
 

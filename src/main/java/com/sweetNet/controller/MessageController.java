@@ -20,7 +20,7 @@ import com.sweetNet.service.MemberService;
 import com.sweetNet.service.MessageContentService;
 import com.sweetNet.service.MessageService;
 import com.sweetNet.until.JwtTokenUtils;
-import com.sweetNet.until.SystemInfo;
+import com.sweetNet.until.ConfigInfo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,7 +44,7 @@ public class MessageController {
 		// 獲取到JSONObject
 		JSONObject jsonParam = new JSONObject();
 		String token = au.substring(7);
-		String states = SystemInfo.DATA_OK;
+		String states = ConfigInfo.DATA_OK;
 		String recId = JwtTokenUtils.getJwtMemUuid(token);
 		try {
 			tokenCheck = JwtTokenUtils.validateToken(token);
@@ -81,12 +81,12 @@ public class MessageController {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			states = SystemInfo.DATA_ERR_SYS;
+			states = ConfigInfo.DATA_ERR_SYS;
 			jsonParam.put("msg", e.getMessage());
 			jsonParam.put("states", states);
 			return jsonParam;
 		}
-		jsonParam.put("msg", SystemInfo.SYS_MESSAGE_SUCCESS);
+		jsonParam.put("msg", ConfigInfo.SYS_MESSAGE_SUCCESS);
 		jsonParam.put("states", states);
 
 		return jsonParam;

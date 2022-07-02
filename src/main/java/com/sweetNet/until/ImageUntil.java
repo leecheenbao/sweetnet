@@ -44,9 +44,10 @@ public class ImageUntil {
 	 * @param imgFilePath 生成圖片保存路徑
 	 * @return boolean
 	 */
-	public static List<Object> GenerateImage(String base64ImgData, String imgFilePath, String memUuid) {
+	public static List<Object> GenerateImage(String base64ImgData, String imgFilePath, String localIP, String memUuid) {
 		String fileName = "";
 		String URL = "";
+		String connectURL = "";
 		Boolean check = false;
 		try {
 			if (base64ImgData != null) {
@@ -75,9 +76,11 @@ public class ImageUntil {
 						bytes[i] += 256;
 					}
 				}
-
+				// 檔案實體位置
 				URL = String.valueOf(targetFile + "/" + fileName);
-
+				
+				// 對外連線位置
+				connectURL = String.valueOf(localIP + "/" + URL.substring(10, URL.length())).replace("\\", "/");
 				// 生成檔案
 				OutputStream out = new FileOutputStream(URL);
 				out.write(bytes);
@@ -90,8 +93,10 @@ public class ImageUntil {
 		} catch (Exception e) {
 		}
 		List<Object> list = new ArrayList<Object>();
-		list.add(URL);
+		list.add(connectURL);
+//		list.add(URL);
 		list.add(check);
+
 		return list;
 	}
 }

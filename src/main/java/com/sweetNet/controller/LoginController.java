@@ -21,7 +21,7 @@ import com.sweetNet.repository.MemberRepository;
 import com.sweetNet.service.MemberService;
 import com.sweetNet.until.AesHelper;
 import com.sweetNet.until.JwtTokenUtils;
-import com.sweetNet.until.SystemInfo;
+import com.sweetNet.until.ConfigInfo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -53,8 +53,8 @@ public class LoginController {
 		Member member = new Member();
 
 		Map<String, Object> map = new HashMap<String, Object>();
-		String msg = SystemInfo.SYS_MESSAGE_SUCCESS;
-		String states = SystemInfo.DATA_OK;
+		String msg = ConfigInfo.SYS_MESSAGE_SUCCESS;
+		String states = ConfigInfo.DATA_OK;
 
 		try {
 
@@ -86,13 +86,13 @@ public class LoginController {
 				String JWTtoken = JwtTokenUtils.generateToken(dataMap); // 取得token
 				map.put("token", JWTtoken);
 			}else {
-				states = SystemInfo.DATA_FAIL;
+				states = ConfigInfo.DATA_FAIL;
 				msg = "登入失敗 !  請檢查信箱與密碼是否輸入錯誤 !?";
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			states = SystemInfo.DATA_FAIL;
+			states = ConfigInfo.DATA_FAIL;
 			msg = "登入失敗 !  請檢查信箱與密碼是否輸入錯誤 !?";
 		}
 
