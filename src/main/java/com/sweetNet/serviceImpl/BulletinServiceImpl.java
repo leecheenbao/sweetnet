@@ -1,4 +1,4 @@
-package com.sweetNet.service;
+package com.sweetNet.serviceImpl;
 
 import java.util.List;
 
@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.sweetNet.model.Bulletin;
 import com.sweetNet.repository.BulletinRepository;
+import com.sweetNet.service.BulletinService;
 
 @Service
 public class BulletinServiceImpl implements BulletinService {

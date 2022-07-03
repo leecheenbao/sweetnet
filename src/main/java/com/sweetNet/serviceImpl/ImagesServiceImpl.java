@@ -1,4 +1,4 @@
-package com.sweetNet.service;
+package com.sweetNet.serviceImpl;
 
 import java.util.List;
 
@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.sweetNet.model.Images;
 import com.sweetNet.repository.ImagesRepository;
+import com.sweetNet.service.ImagesService;
 
 @Service
 public class ImagesServiceImpl implements ImagesService {

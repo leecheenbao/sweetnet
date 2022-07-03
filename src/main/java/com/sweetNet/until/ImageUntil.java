@@ -78,7 +78,7 @@ public class ImageUntil {
 				}
 				// 檔案實體位置
 				URL = String.valueOf(targetFile + "/" + fileName);
-				
+
 				// 對外連線位置
 				connectURL = String.valueOf(localIP + "/" + URL.substring(10, URL.length())).replace("\\", "/");
 				// 生成檔案
@@ -98,5 +98,56 @@ public class ImageUntil {
 		list.add(check);
 
 		return list;
+	}
+
+	public static String GenerateDashboardImage(String code, String base64ImgData) {
+		String fileName = "";
+		String URL = "";
+		String connectURL = "";
+		try {
+			if (base64ImgData != null) {
+
+				/* 解析前端送來的base64 */
+				String imageData = ImageUntil.getBase64Format(base64ImgData);
+
+				/* 判斷副檔名 */
+				String subName = ImageUntil.extractMimeType(base64ImgData);
+				/* 重組檔案名稱 */
+				fileName = String.valueOf(code + "." + subName);
+				/* 以會員UUID開新目錄已經存在就不開 */
+				File targetFile = new File(ConfigInfo.DASHBOARD_IMG_PATH);
+				targetFile.setWritable(true, false);
+				if (!targetFile.exists()) {
+					targetFile.mkdirs();
+				}
+
+				BASE64Decoder decoder = new BASE64Decoder();
+
+				// Base64解碼
+				byte[] bytes = decoder.decodeBuffer(imageData);
+				for (int i = 0; i < bytes.length; ++i) {
+					if (bytes[i] < 0) {// 調整異常數據
+						bytes[i] += 256;
+					}
+				}
+				// 檔案實體位置
+				URL = String.valueOf(targetFile + "/" + fileName);
+
+				// 對外連線位置
+				connectURL = String
+						.valueOf(ConfigInfo.REAL_PATH + ConfigInfo.DASHBOARD_IMG_CONNECT_PATH + "/" + fileName)
+						.replace("\\", "/");
+				// 生成檔案
+				OutputStream out = new FileOutputStream(URL);
+				out.write(bytes);
+				out.flush();
+				out.close();
+			} else {
+				return null;
+			}
+		} catch (Exception e) {
+		}
+
+		return connectURL;
 	}
 }

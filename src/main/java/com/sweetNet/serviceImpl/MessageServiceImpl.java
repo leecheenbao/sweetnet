@@ -1,4 +1,4 @@
-package com.sweetNet.service;
+package com.sweetNet.serviceImpl;
 
 import java.util.List;
 
@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.sweetNet.model.Message;
 import com.sweetNet.repository.MessageRepository;
+import com.sweetNet.service.MessageService;
 
 @Service
 public class MessageServiceImpl implements MessageService {
@@ -19,8 +20,8 @@ public class MessageServiceImpl implements MessageService {
 	}
 
 	@Override
-	public void save(Message contact) {
-		messageRepository.save(contact);
+	public void save(Message message) {
+		messageRepository.save(message);
 	}
 
 	@Override

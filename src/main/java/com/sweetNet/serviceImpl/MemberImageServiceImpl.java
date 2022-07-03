@@ -1,10 +1,11 @@
-package com.sweetNet.service;
+package com.sweetNet.serviceImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sweetNet.model.MemberImage;
 import com.sweetNet.repository.MemberImageRepository;
+import com.sweetNet.service.MemberImageService;
 
 @Service
 public class MemberImageServiceImpl implements MemberImageService {

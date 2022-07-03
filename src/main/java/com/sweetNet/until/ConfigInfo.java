@@ -10,6 +10,10 @@ public class ConfigInfo {
 //	public static Properties p = PropUtil.getProperty("/oracle/config/mliweb.properties");
 	public static Properties p = PropUtil.getProperty(FILE_PATH + "sweetNet.properties");
 
+	public static String REAL_PATH = "http://sugarbabytw.com:8083";
+	public static String DASHBOARD_IMG_CONNECT_PATH = "/sweetNetImg/images_dashboard";
+	public static String DASHBOARD_IMG_PATH = "/home/hsa" + DASHBOARD_IMG_CONNECT_PATH;
+
 	public static String PHONE_REGEX = "(09)+[\\d]{8}";
 	public static String MAIL_REGEX = "^\\w{1,63}@[a-zA-Z0-9]{2,63}\\.[a-zA-Z]{2,63}(\\.[a-zA-Z]{2,63})?$";
 

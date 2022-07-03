@@ -34,6 +34,7 @@ import com.infobip.sms.SendSmsBasic;
 import com.sweetNet.dto.MemberDTO;
 import com.sweetNet.dto.MemberInfoDTO;
 import com.sweetNet.dto.PhoneOtpDTO;
+import com.sweetNet.dto.SearchConditionDTO;
 import com.sweetNet.dto.SignUpDTO;
 import com.sweetNet.model.Images;
 import com.sweetNet.model.Member;
@@ -173,7 +174,7 @@ public class MemberController {
 			tokenCheck = JwtTokenUtils.validateToken(token);
 
 			if (tokenCheck) {
-				
+
 				String memName = memberInfoDTO.getMemName();
 				String memNickname = memberInfoDTO.getMemNickname();
 				String memPhone = memberInfoDTO.getMemPhone();
@@ -190,7 +191,7 @@ public class MemberController {
 //				Integer memSmoke = Integer.valueOf(memberInfoDTO.getMemSmoke());
 //				Integer memIncome = Integer.valueOf(memberInfoDTO.getMemIncome());
 				Integer memBody = Integer.valueOf(memberInfoDTO.getMemBody());
-				
+
 				Integer memPattern = Integer.valueOf(memberInfoDTO.getMemPattern());
 				Integer memAssets = Integer.valueOf(memberInfoDTO.getMemAssets());
 				Integer memIsvip = 0;
@@ -206,18 +207,15 @@ public class MemberController {
 				String mem_rdate = dtf.format(dateObj);
 				Integer memSta = 1;
 
-//				if (("").equals(memPhone) || !pattern.matcher(memPhone).find()) {
-//					states = ConfigInfo.DATA_FAIL;
-//					msg = ConfigInfo.ERROR_PHONE;
-//				}
 				Member member = new Member();
 				member.setMemUuid(memUuid);
 				MemberDTO memberDTO = memberService.findOneByUuid(memUuid);
-				
+
 				member.setMemPwd(memberDTO.getMemPwd());
 				member.setMemMail(memberDTO.getMemMail());
 				member.setMemSex(memberDTO.getMemSex());
 				member.setMemLgd(memberDTO.getMemLgd());
+				member.setMemPhone(memberDTO.getMemPhone());
 				member.setPhoneStates(memberDTO.getPhoneStates());
 
 				member.setMemUuid(memUuid);
@@ -242,7 +240,7 @@ public class MemberController {
 				member.setMemSta(memSta);
 				member.setMemAbout(memAbout);
 				member.setMemDep(memDep);
-				
+
 				memberService.save(member);
 				states = ConfigInfo.DATA_OK;
 				msg = ConfigInfo.SYS_MESSAGE_SUCCESS;
@@ -368,7 +366,8 @@ public class MemberController {
 	 */
 	@ApiOperation("顯示會員資料 - 以登入會員的性別分類，男生只能看到女生、女生只能看到男生")
 	@GetMapping(value = "/users")
-	public List<Map<Object, Object>> getUserInfoBySex(@RequestHeader("Authorization") String au) {
+	public List<Map<Object, Object>> getUserInfoBySex(@RequestHeader("Authorization") String au,
+			@RequestBody SearchConditionDTO searchConditionDTO) {
 		List<Map<Object, Object>> result = new ArrayList<Map<Object, Object>>();
 		String token = au.substring(7);
 		List<MemberDTO> memberDTOs = new ArrayList<MemberDTO>();

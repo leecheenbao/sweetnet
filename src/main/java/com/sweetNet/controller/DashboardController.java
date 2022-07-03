@@ -13,7 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sweetNet.model.Bulletin;
+import com.sweetNet.model.Dashboard;
 import com.sweetNet.service.BulletinService;
+import com.sweetNet.service.DashboardService;
+import com.sweetNet.until.ImageUntil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,6 +28,8 @@ public class DashboardController {
 
 	@Autowired
 	private BulletinService bulletinService;
+	@Autowired
+	private DashboardService dashboardService;
 
 	@ApiOperation("取得全部公告訊息（含不顯示）")
 	@GetMapping(value = "/bulletin")
@@ -58,5 +63,28 @@ public class DashboardController {
 		bulletin.setUpdateTime(new Date());
 		bulletinService.save(bulletin);
 		return bulletin;
+	}
+
+	@ApiOperation("取得面板顯示")
+	@GetMapping(value = "/dashboard")
+	protected List<Dashboard> getDashboard() {
+		return dashboardService.findAll();
+	}
+
+	@ApiOperation("更新面板顯示")
+	@PutMapping(value = "/dashboard")
+	protected List<Dashboard> updateDashboard(@RequestBody Dashboard d) {
+		Dashboard dashboard = dashboardService.findOne(d.getCode());
+
+		if (d.getName().contains("IMG")) {
+			String URL = ImageUntil.GenerateDashboardImage(d.getCode(), d.getContent());
+			dashboard.setContent(URL);
+		} else {
+			dashboard.setContent(d.getContent());
+		}
+		dashboard.setName(d.getName());
+		dashboardService.save(dashboard);
+		return dashboardService.findAll();
+
 	}
 }

@@ -1,4 +1,4 @@
-package com.sweetNet.service;
+package com.sweetNet.serviceImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.sweetNet.dto.MemberDTO;
 import com.sweetNet.model.Member;
 import com.sweetNet.repository.MemberRepository;
+import com.sweetNet.service.MemberService;
 
 @Service
 public class MemberServiceImpl implements MemberService {

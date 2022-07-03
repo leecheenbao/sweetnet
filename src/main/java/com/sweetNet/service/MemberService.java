@@ -3,6 +3,7 @@ package com.sweetNet.service;
 import java.util.List;
 
 import com.sweetNet.dto.MemberDTO;
+import com.sweetNet.dto.SearchConditionDTO;
 import com.sweetNet.model.Member;
 
 public interface MemberService {
@@ -18,4 +19,6 @@ public interface MemberService {
 	MemberDTO findOneByUuid(String memberUuid);
 
 	void save(Member member);
+	
+	List<MemberDTO> findByCondition(SearchConditionDTO searchConditionDTO);
 }
