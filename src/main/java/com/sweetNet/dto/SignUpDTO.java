@@ -1,7 +1,6 @@
 package com.sweetNet.dto;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.Pattern;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -12,7 +11,7 @@ public class SignUpDTO {
 	private String memMail;
 
 	@ApiModelProperty("密碼-密碼必須為長度6~16位碼大小寫英文加數字")
-	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[\\w]{6,16}$", message = "密碼必須為長度6~16位碼大小寫英文加數字")
+//	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[\\w]{6,16}$", message = "密碼必須為長度6~16位碼大小寫英文加數字")
 	private String memPwd;
 
 	@ApiModelProperty("暱稱")

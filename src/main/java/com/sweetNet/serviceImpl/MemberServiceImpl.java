@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sweetNet.dto.MemberDTO;
+import com.sweetNet.dto.SearchConditionDTO;
 import com.sweetNet.model.Member;
 import com.sweetNet.repository.MemberRepository;
 import com.sweetNet.service.MemberService;
@@ -16,6 +17,37 @@ import com.sweetNet.service.MemberService;
 public class MemberServiceImpl implements MemberService {
 	@Autowired
 	private MemberRepository memberRepository;
+
+	@Override
+	public List<MemberDTO> findByCondition(SearchConditionDTO searchConditionDTO) {
+		String memArea = searchConditionDTO.getMemArea();
+		String memCountry = searchConditionDTO.getMemCountry();
+		Integer heightMin = searchConditionDTO.getHeightMin();
+		Integer heightMax = searchConditionDTO.getHeightMax();
+		Integer weightMin = searchConditionDTO.getWeightMin();
+		Integer weightMax = searchConditionDTO.getWeightMax();
+		Integer memPattern = searchConditionDTO.getMemPattern();
+		Integer memSex = searchConditionDTO.getMemSex();
+
+//		/* 取得異性代碼 */
+//		if (memSex == 1) {
+//			memSex = 2;
+//		} else if (memSex == 2) {
+//			memSex = 1;
+//		}
+
+		List<Member> members = memberRepository.findCondiction(memCountry, memArea, heightMin, heightMax, weightMin,
+				weightMax, memPattern);
+
+		List<MemberDTO> memberDTOs = new ArrayList<MemberDTO>();
+		for (Member member : members) {
+			if (member.getMemSex() != memSex && member.getMemSex() > 0) {
+				MemberDTO memberDTO = this.getMemberDTOFromMember(member);
+				memberDTOs.add(memberDTO);
+			}
+		}
+		return memberDTOs;
+	}
 
 	@Override
 	public List<MemberDTO> findAll() {

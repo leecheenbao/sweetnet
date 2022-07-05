@@ -13,4 +13,6 @@ public interface BulletinService {
 	Bulletin findOne(Integer id);
 
 	List<Bulletin> findBySates(Integer states);
+
+	void delete(Integer id);
 }

@@ -34,4 +34,12 @@ public class BulletinServiceImpl implements BulletinService {
 		return bulletinRepository.findByStates(states);
 	}
 
+	@Override
+	public void delete(Integer id) {
+		Bulletin bulletin = bulletinRepository.findById(id);
+		if (bulletin != null) {
+			bulletinRepository.delete(bulletin);
+		}
+	}
+
 }

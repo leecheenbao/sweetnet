@@ -2,44 +2,62 @@ package com.sweetNet.dto;
 
 public class SearchConditionDTO {
 
-	private String city;
-	private String area;
+	private String memCountry;
+	private String memArea;
 	private Integer weightMin;
 	private Integer weightMax;
 	private Integer heightMin;
 	private Integer heightMax;
-	private Integer pattern;
+	private Integer memPattern;
+	private Integer memSex;
 
 	public SearchConditionDTO() {
 		super();
 	}
 
-	public SearchConditionDTO(String city, String area, Integer weightMin, Integer weightMax, Integer heightMin,
-			Integer heightMax, Integer pattern) {
+	public SearchConditionDTO(String memCountry, String memArea, Integer weightMin, Integer weightMax,
+			Integer heightMin, Integer heightMax, Integer memPattern, Integer memSex) {
 		super();
-		this.city = city;
-		this.area = area;
+		this.memCountry = memCountry;
+		this.memArea = memArea;
 		this.weightMin = weightMin;
 		this.weightMax = weightMax;
 		this.heightMin = heightMin;
 		this.heightMax = heightMax;
-		this.pattern = pattern;
+		this.memPattern = memPattern;
+		this.memSex = memSex;
 	}
 
-	public String getCity() {
-		return city;
+	public Integer getMemPattern() {
+		return memPattern;
 	}
 
-	public void setCity(String city) {
-		this.city = city;
+	public void setMemPattern(Integer memPattern) {
+		this.memPattern = memPattern;
 	}
 
-	public String getArea() {
-		return area;
+	public Integer getMemSex() {
+		return memSex;
 	}
 
-	public void setArea(String area) {
-		this.area = area;
+	public void setMemSex(Integer memSex) {
+		this.memSex = memSex;
+	}
+
+	public String getMemCountry() {
+		return memCountry;
+	}
+
+	public void setMemCountry(String memCountry) {
+		this.memCountry = memCountry;
+	}
+
+	public String getMemArea() {
+		return memArea;
+	}
+
+	public void setMemArea(String memArea) {
+		this.memArea = memArea;
 	}
 
 	public Integer getWeightMin() {
@@ -72,19 +90,6 @@ public class SearchConditionDTO {
 
 	public void setHeightMax(Integer heightMax) {
 		this.heightMax = heightMax;
-	}
-
-	public Integer getpattern() {
-		return pattern;
-	}
-
-	public void setpattern(Integer pattern) {
-		this.pattern = pattern;
-	}
-
-	public SearchConditionDTO(String city) {
-		super();
-		this.city = city;
 	}
 
 }

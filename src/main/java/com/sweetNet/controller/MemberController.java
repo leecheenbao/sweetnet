@@ -367,7 +367,7 @@ public class MemberController {
 	@ApiOperation("顯示會員資料 - 以登入會員的性別分類，男生只能看到女生、女生只能看到男生")
 	@GetMapping(value = "/users")
 	public List<Map<Object, Object>> getUserInfoBySex(@RequestHeader("Authorization") String au,
-			@RequestBody SearchConditionDTO searchConditionDTO) {
+			SearchConditionDTO searchConditionDTO) {
 		List<Map<Object, Object>> result = new ArrayList<Map<Object, Object>>();
 		String token = au.substring(7);
 		List<MemberDTO> memberDTOs = new ArrayList<MemberDTO>();
@@ -380,18 +380,9 @@ public class MemberController {
 
 				MemberDTO memberDTO = memberService.findOneByUuid(memUuid);
 
-				Integer memSex = memberDTO.getMemSex();
+				searchConditionDTO.setMemSex(memberDTO.getMemSex());
 
-				/* 取得異性代碼 */
-				if (memSex == 1) {
-					memSex = 2;
-					memberDTOs = memberService.findByMemSex(memSex);
-				} else if (memSex == 2) {
-					memSex = 1;
-					memberDTOs = memberService.findByMemSex(memSex);
-				} else if (memSex == 0) {
-					memberDTOs = memberService.findAll();
-				}
+				memberDTOs = memberService.findByCondition(searchConditionDTO);
 
 				for (MemberDTO member : memberDTOs) {
 					String uuid = member.getMemUuid();
