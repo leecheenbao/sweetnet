@@ -23,7 +23,7 @@ public class CorsFilter implements Filter {
 
 		String allowOrigin = "http://localhost";
 		
-		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Origin", "sugarbabytw.com");
 		response.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT,OPTIONS");
 		response.setHeader("Access-Control-Max-Age", "86400");
 		response.setHeader("Access-Control-Allow-Headers", "*");
