@@ -26,7 +26,6 @@ public class ImagesServiceImpl implements ImagesService {
 
 	@Override
 	public Images findByMemUuid(String memUuid) {
-		System.out.println(imagesRepository.findByMemUuid(memUuid));
 		return imagesRepository.findByMemUuid(memUuid);
 	}
 

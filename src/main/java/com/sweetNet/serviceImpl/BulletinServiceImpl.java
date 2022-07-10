@@ -16,7 +16,7 @@ public class BulletinServiceImpl implements BulletinService {
 
 	@Override
 	public List<Bulletin> findAll() {
-		return bulletinRepository.findAll();
+		return bulletinRepository.findAllOrderByPostTime();
 	}
 
 	@Override
@@ -30,8 +30,8 @@ public class BulletinServiceImpl implements BulletinService {
 	}
 
 	@Override
-	public List<Bulletin> findBySates(Integer states) {
-		return bulletinRepository.findByStates(states);
+	public List<Bulletin> findBySates() {
+		return bulletinRepository.findByStates();
 	}
 
 	@Override

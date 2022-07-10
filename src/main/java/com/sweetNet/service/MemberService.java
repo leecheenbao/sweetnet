@@ -16,9 +16,11 @@ public interface MemberService {
 
 	MemberDTO findOneByEmail(String memMail);
 
-	MemberDTO findOneByUuid(String memberUuid);
+	MemberDTO findOneByEmailAndPwd(String memMail, String memPwd);
+
+	MemberDTO findOneByUuid(String memUuid);
 
 	void save(Member member);
-	
-	List<MemberDTO> findByCondition(SearchConditionDTO searchConditionDTO);
+
+	List<MemberDTO> findByCondition(String action, SearchConditionDTO searchConditionDTO);
 }

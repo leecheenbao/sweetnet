@@ -3,15 +3,21 @@ package com.sweetNet.controller;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.gson.Gson;
 import com.sweetNet.dto.LoginDTO;
@@ -20,10 +26,12 @@ import com.sweetNet.dto.SignUpDTO;
 import com.sweetNet.model.Member;
 import com.sweetNet.repository.MemberRepository;
 import com.sweetNet.service.MemberService;
+import com.sweetNet.serviceImpl.MemberServiceImpl;
 import com.sweetNet.until.AesHelper;
 import com.sweetNet.until.ConfigInfo;
 import com.sweetNet.until.JwtTokenUtils;
 import com.sweetNet.until.SendMail;
+import com.sweetNet.until.Until;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -38,6 +46,7 @@ public class LoginController {
 	private MemberRepository memberRepository;
 	@Autowired
 	private MemberService memberService;
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	/**
 	 * 會員登入
@@ -58,26 +67,29 @@ public class LoginController {
 		String msg = ConfigInfo.SYS_MESSAGE_SUCCESS;
 		String states = ConfigInfo.DATA_OK;
 
+		// 驗證信箱、密碼
+		String memMail = loginDTO.getMemMail();
+		String memPwd = AesHelper.encrypt(loginDTO.getMemPwd());
 		try {
-
-			// 驗證信箱、密碼
-			String memMail = loginDTO.getMemMail();
-			String memPwd = AesHelper.encrypt(loginDTO.getMemPwd());
 
 			member.setMemMail(memMail);
 			member.setMemPwd(memPwd);
-			Example<Member> example = Example.of(member);
-			Optional<Member> eresult = memberRepository.findOne(example);
-			if (eresult.isPresent()) {
+			MemberDTO memberDTO = memberService.findOneByEmailAndPwd(memMail, memPwd);
 
-				Example<Member> memberExample = Example.of(member);
-				member = memberRepository.findOne(memberExample).get();
+			if (memberDTO != null) {
+
+				member = new MemberServiceImpl().getMemberFromMemberDTO(memberDTO);
 				/* 登入次數 */
 				Integer lgd = 0;
 				if (member.getMemLgd() != null)
 					lgd = member.getMemLgd();
-				member.setMemLgd(lgd + 1);
 
+				String memRdate = member.getMemRdate();
+				Integer count = Until.getBetweenDateCount(memRdate);
+				Integer accountValue = Until.getAccountValue(member.getMemLgd(), count, member.getMemIsvip());
+
+				member.setMemSeq(accountValue);
+				member.setMemLgd(lgd + 1);
 				memberRepository.save(member);
 
 				String memUuid = member.getMemUuid();
@@ -87,6 +99,8 @@ public class LoginController {
 
 				String JWTtoken = JwtTokenUtils.generateToken(dataMap); // 取得token
 				map.put("token", JWTtoken);
+
+				logger.info("登入成功 mail = " + memMail);
 			} else {
 				states = ConfigInfo.DATA_FAIL;
 				msg = "登入失敗 !  請檢查信箱與密碼是否輸入錯誤 !?";
@@ -96,6 +110,8 @@ public class LoginController {
 			e.printStackTrace();
 			states = ConfigInfo.DATA_FAIL;
 			msg = "登入失敗 !  請檢查信箱與密碼是否輸入錯誤 !?";
+			logger.error("登入失敗 mail = " + memMail);
+			logger.error(e.getMessage());
 		}
 
 		map.put("states", states);
@@ -108,21 +124,23 @@ public class LoginController {
 
 	@ApiOperation("忘記密碼")
 	@PostMapping(value = "/forget")
-	protected String forget(@RequestBody SignUpDTO signUpDTO) throws ServletException, IOException {
+	protected String forget(HttpServletRequest request, @RequestBody SignUpDTO signUpDTO)
+			throws ServletException, IOException {
 		Map<String, Object> map = new HashMap<String, Object>();
 		String msg = ConfigInfo.SYS_MESSAGE_SUCCESS;
 		String states = ConfigInfo.DATA_OK;
-
+		String action = request.getServletPath().replace("/", "");
 		try {
-
-			String mail = signUpDTO.getMemMail();
-			StringBuffer subject = new StringBuffer();
-			subject.append("忘記密碼");
-			StringBuffer content = new StringBuffer();
-			content.append("請點擊下方連結盡速更改密碼");
-
-			SendMail sendMail = new SendMail();
-			sendMail.sendMail_SugarDaddy(String.valueOf(subject), String.valueOf(content), mail);
+			MemberDTO memberDTO = memberService.findOneByEmail(signUpDTO.getMemMail());
+			String mail = memberDTO.getMemMail();
+			String memUuid = memberDTO.getMemUuid();
+			if (memUuid != null) {
+				SendMail sendMail = new SendMail();
+				sendMail.sendMail_SugarDaddy(action, memUuid, mail);
+			} else {
+				states = ConfigInfo.DATA_NORESULT;
+				msg = "請確認信箱";
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -133,6 +151,26 @@ public class LoginController {
 		Gson gson = new Gson();
 
 		return gson.toJson(map);
+	}
+
+	/**
+	 * 忘記密碼導頁更改密碼 - 寄驗證信到信箱
+	 */
+	@ApiOperation("收信後更改密碼 - 寄驗證信到信箱從信箱點擊")
+	@RequestMapping(value = "/forget/{memUuid}", method = RequestMethod.GET)
+	public RedirectView updateAccount(RedirectAttributes attr, @PathVariable String memUuid) {
+		MemberDTO memberDTO = new MemberDTO();
+		memberDTO = memberService.findOneByUuid(memUuid);
+		String url = "";
+		if (memberDTO.getMemUuid() != null) {
+
+			String memMail = memberDTO.getMemMail();
+			attr.addAttribute("memMail", memMail);
+			attr.addAttribute("memUuid", memUuid);
+			url = ConfigInfo.REAL_PATH + "/sugardaddyDevelop/dist/resend-password";
+
+		}
+		return new RedirectView(url); // 重新導向到指定的url
 	}
 
 	public Member getMemberFromMemberDTO(MemberDTO memberDTO) {

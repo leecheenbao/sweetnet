@@ -25,9 +25,6 @@ public class ImageUntil {
 
 	/**
 	 * 判斷圖片base64字符串的文件格式
-	 * 
-	 * @param base64ImgData
-	 * @return
 	 */
 	private static String extractMimeType(final String base64ImgData) {
 		final Pattern mime = Pattern.compile("^data:([a-zA-Z0-9]+/[a-zA-Z0-9]+).*,.*");
@@ -39,12 +36,10 @@ public class ImageUntil {
 
 	/**
 	 * 對字節數組字符串進行Base64解碼並生成圖片
-	 * 
-	 * @param imgStr      Base64字符串
-	 * @param imgFilePath 生成圖片保存路徑
-	 * @return boolean
 	 */
-	public static List<Object> GenerateImage(String base64ImgData, String imgFilePath, String localIP, String memUuid) {
+	public static List<Object> GenerateImage(String base64ImgData, String memUuid) {
+		String imgFilePath = ConfigInfo.IMAGE_PATH;
+		String localIP = ConfigInfo.REAL_PATH;
 		String fileName = "";
 		String URL = "";
 		String connectURL = "";
@@ -94,12 +89,12 @@ public class ImageUntil {
 		}
 		List<Object> list = new ArrayList<Object>();
 		list.add(connectURL);
-//		list.add(URL);
 		list.add(check);
 
 		return list;
 	}
 
+	/* 後臺圖片 */
 	public static String GenerateDashboardImage(String code, String base64ImgData) {
 		String fileName = "";
 		String URL = "";
@@ -149,5 +144,29 @@ public class ImageUntil {
 		}
 
 		return connectURL;
+	}
+
+	public static void deleteFile(String URL) {
+
+		File file = new File(URL);
+		if (file.exists()) {// 判斷路徑是否存在
+			if (file.isFile()) {// boolean isFile():測試此抽象路徑名錶示的檔案是否是一個標準檔案。
+				file.delete();
+			}
+			file.delete();
+		} else {
+			System.out.println("該file路徑不存在！！");
+		}
+	}
+
+	public static void main(String[] args) {
+		String URL = "http://sugarbabytw.com:8083/sweetNetImg/images/e8bd588c-8bc0-4b06-bf14-db8049c821de/1656783948926.png";
+		String[] url = URL.split("/");
+
+		String filePath = "/home/hsa/sweetNetImg/images";
+		URL = filePath + "/" + url[url.length - 2] + "/" + url[url.length - 1];
+		
+		System.out.println(URL);
+//		deleteFile(URL);
 	}
 }

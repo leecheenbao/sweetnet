@@ -4,6 +4,7 @@ com\sweetNet\service\BulletinService.class
 com\sweetNet\until\JwtTokenUtils.class
 com\sweetNet\repository\MemberRepository.class
 com\sweetNet\until\Until.class
+com\sweetNet\dto\MailDTO.class
 com\sweetNet\until\GetGooglePlace.class
 com\sweetNet\until\PhoneUtil.class
 com\sweetNet\dto\SignUpDTO.class
@@ -14,6 +15,7 @@ com\sweetNet\service\DashboardService.class
 com\sweetNet\repository\MessageRepository.class
 com\sweetNet\model\MemberImage.class
 com\sweetNet\model\Bulletin.class
+com\sweetNet\until\ScheduledTasks.class
 com\sweetNet\serviceImpl\MessageContentServiceImpl.class
 com\sweetNet\dto\PhoneOtpDTO.class
 com\sweetNet\service\MessageContentService.class
@@ -34,10 +36,12 @@ com\sweetNet\controller\MemberController.class
 com\sweetNet\controller\MessageController.class
 com\sweetNet\repository\DashboardRepository.class
 com\sweetNet\dto\MemberDTO.class
+com\sweetNet\model\JsonResult.class
 com\sweetNet\repository\ImagesRepository.class
 com\sweetNet\until\ConfigInfo.class
 com\sweetNet\dto\MessageDTO.class
 com\sweetNet\service\MessageService.class
+com\sweetNet\until\SendMail$2.class
 com\sweetNet\until\SendMail.class
 com\sweetNet\serviceImpl\ImagesServiceImpl.class
 com\sweetNet\serviceImpl\BulletinServiceImpl.class
@@ -55,8 +59,8 @@ com\sweetNet\until\GetLocalJSON.class
 com\sweetNet\until\ImageUntil.class
 com\sweetNet\dto\MemberInfoDTO.class
 com\sweetNet\dto\SearchConditionDTO.class
-com\sweetNet\until\CashPay.class
 com\sweetNet\until\AesHelper.class
 com\sweetNet\SweetNetApplication.class
+com\sweetNet\until\Money.class
 com\sweetNet\model\Dashboard.class
 com\sweetNet\until\AesHelper$KeyLength.class

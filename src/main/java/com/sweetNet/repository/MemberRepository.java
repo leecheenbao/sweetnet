@@ -2,6 +2,7 @@ package com.sweetNet.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -14,6 +15,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 
 	Member findByMemMail(String memEmail);
 
+	Member findByMemMailAndMemPwd(String memEmail,String memPwd);
 //	@Query(value = "select * from Member where "
 //			+ "if(?1 !='',memArea like concat('%',?1,'%'),1=1) and "
 //			+ "if(?2 !='',memCity=?2,1=1) and "
@@ -28,8 +30,17 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 		+ "if(IFNULL(?4,0) !='', 	memHeight 	<  ?4, 	1=1) and "
 		+ "if(IFNULL(?5,0) !='', 	memWeight 	>= ?5, 	1=1) and "
 		+ "if(IFNULL(?6,0) !='', 	memWeight 	<  ?6, 	1=1) and "
-		+ "if(IFNULL(?5,0) !='', 	memPattern 	=  ?5, 	1=1) ",nativeQuery = true)
+		+ "if(IFNULL(?5,0) !='', 	memPattern 	=  ?7, 	1=1) ",nativeQuery = true)
 	List<Member> findCondiction(String memCountry, String memArea,  Integer heightMin,Integer heightMax, Integer weightMin, Integer weightMax, Integer memPattern);
-
+	
+	@Query(value = "select * from MEMBER where "
+			+ "if(?1 !='',				memCountry	=  ?1,	1=1) and "
+			+ "if(?2 !='',				memArea 	=  ?2,	1=1) and "
+			+ "if(IFNULL(?3,0) !='', 	memHeight 	>= ?3, 	1=1) and "
+			+ "if(IFNULL(?4,0) !='', 	memHeight 	<  ?4, 	1=1) and "
+			+ "if(IFNULL(?5,0) !='', 	memWeight 	>= ?5, 	1=1) and "
+			+ "if(IFNULL(?6,0) !='', 	memWeight 	<  ?6, 	1=1) and "
+			+ "if(IFNULL(?5,0) !='', 	memPattern 	=  ?7, 	1=1)",nativeQuery = true)
+	List<Member> findCondiction(String memCountry, String memArea,  Integer heightMin,Integer heightMax, Integer weightMin, Integer weightMax, Integer memPattern, Pageable p);
 
 }

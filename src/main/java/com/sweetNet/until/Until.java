@@ -4,7 +4,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -17,6 +20,30 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class Until {
+	/* 計算會員活躍度分數 */
+	public static Integer getAccountValue(Integer memLgd, Integer count, Integer memIsVip) {
+		double bonus = (memIsVip == 1) ? 1.5 : 1;
+		double result = memLgd * bonus + count;
+		return Integer.valueOf((int) Math.round(result));
+	}
+
+	/* 計算註冊天數 */
+	public static Integer getBetweenDateCount(String memRdate) {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String today = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+		long betweenDate = 0;
+		try {
+			Date beginDate = sdf.parse(memRdate);
+			Date endDate = sdf.parse(today);
+			betweenDate = (endDate.getTime() - beginDate.getTime()) / (1000 * 60 * 60 * 24);
+
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		Integer count = (betweenDate == 0) ? 1 : Math.toIntExact(betweenDate + 1);
+		return count;
+	}
 
 	/** 取得前端Json Param **/
 	public static JSONObject getJSONParam(HttpServletRequest request) {

@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.sweetNet.dto.MemberDTO;
@@ -19,7 +22,7 @@ public class MemberServiceImpl implements MemberService {
 	private MemberRepository memberRepository;
 
 	@Override
-	public List<MemberDTO> findByCondition(SearchConditionDTO searchConditionDTO) {
+	public List<MemberDTO> findByCondition(String action, SearchConditionDTO searchConditionDTO) {
 		String memArea = searchConditionDTO.getMemArea();
 		String memCountry = searchConditionDTO.getMemCountry();
 		Integer heightMin = searchConditionDTO.getHeightMin();
@@ -29,16 +32,21 @@ public class MemberServiceImpl implements MemberService {
 		Integer memPattern = searchConditionDTO.getMemPattern();
 		Integer memSex = searchConditionDTO.getMemSex();
 
-//		/* 取得異性代碼 */
-//		if (memSex == 1) {
-//			memSex = 2;
-//		} else if (memSex == 2) {
-//			memSex = 1;
-//		}
+		/* 僅能瀏覽異性資料 */
+		if (memSex > 0) {
+			memSex = (memSex == 1) ? 2 : 1;
+		}
+
+		Integer total = memberRepository.findAll().size();
+		Pageable pageable = null;
+		if (action.equals("hot")) {
+			pageable = PageRequest.of(0, total, Sort.Direction.DESC, "memSeq");
+		} else if (action.equals("new")) {
+			pageable = PageRequest.of(0, total, Sort.Direction.DESC, "memRdate");
+		}
 
 		List<Member> members = memberRepository.findCondiction(memCountry, memArea, heightMin, heightMax, weightMin,
-				weightMax, memPattern);
-
+				weightMax, memPattern, pageable);
 		List<MemberDTO> memberDTOs = new ArrayList<MemberDTO>();
 		for (Member member : members) {
 			if (member.getMemSex() != memSex && member.getMemSex() > 0) {
@@ -47,6 +55,13 @@ public class MemberServiceImpl implements MemberService {
 			}
 		}
 		return memberDTOs;
+	}
+
+	@Override
+	public MemberDTO findOneByEmailAndPwd(String memEmail, String memPwd) {
+		Member member = memberRepository.findByMemMailAndMemPwd(memEmail, memPwd);
+		MemberDTO memberDTO = this.getMemberDTOFromMember(member);
+		return memberDTO;
 	}
 
 	@Override
@@ -140,6 +155,7 @@ public class MemberServiceImpl implements MemberService {
 		member.setMemAbout(memberDTO.getMemAbout());
 		member.setMemBody(memberDTO.getMemBody());
 		member.setMemPattern(memberDTO.getMemPattern());
+		member.setMemSeq(memberDTO.getMemSeq());
 		return member;
 	}
 
@@ -171,7 +187,7 @@ public class MemberServiceImpl implements MemberService {
 		memberDTO.setMemAbout(member.getMemAbout());
 		memberDTO.setMemBody(member.getMemBody());
 		memberDTO.setMemPattern(member.getMemPattern());
-
+		memberDTO.setMemSeq(member.getMemSeq());
 		memberDTO.setPhoneStates(member.getPhoneStates());
 		memberDTO.setMemPwd(member.getMemPwd());
 		return memberDTO;

@@ -73,16 +73,16 @@ public class Member {
 	private Integer memAssets;
 
 	@Column(name = "memIsvip")
-	private Integer memIsvip;
+	private Integer memIsvip = 0;
 
 	@Column(name = "memRdate")
 	private String memRdate;
 
 	@Column(name = "memLgd")
-	private Integer memLgd;
+	private Integer memLgd = 0;
 
 	@Column(name = "memSta")
-	private Integer memSta;
+	private Integer memSta = 0;
 
 	@Column(name = "memAbout")
 	private String memAbout;
@@ -92,6 +92,9 @@ public class Member {
 
 	@Column(name = "memPattern")
 	private Integer memPattern;
+
+	@Column(name = "memSeq")
+	private Integer memSeq;
 
 	public Member() {
 		super();
@@ -134,6 +137,14 @@ public class Member {
 		this.memAbout = memAbout;
 		this.memPattern = memPattern;
 		this.memBody = memBody;
+	}
+
+	public Integer getMemSeq() {
+		return memSeq;
+	}
+
+	public void setMemSeq(Integer memSeq) {
+		this.memSeq = memSeq;
 	}
 
 	public Integer getMemBody() {

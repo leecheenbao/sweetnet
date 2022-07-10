@@ -3,16 +3,20 @@ package com.sweetNet.until;
 import java.util.Properties;
 
 public class ConfigInfo {
-	// 讀檔路徑
-//	public static String FILE_PATH = "/oracle/config/";
-	public static String FILE_PATH = "D:/config/";
+	public static String target = "dev";
 
-//	public static Properties p = PropUtil.getProperty("/oracle/config/mliweb.properties");
+	// 讀檔路徑
+//	public static String FILE_PATH = "/home/hsa/config/";
+	public static String REAL_PATH = "http://sugarbabytw.com:8083";
+	public static String FILE_PATH = "D:/config/";
+//	public static String REAL_PATH = "http://localhost:8083";
+
 	public static Properties p = PropUtil.getProperty(FILE_PATH + "sweetNet.properties");
 
-	public static String REAL_PATH = "http://sugarbabytw.com:8083";
 	public static String DASHBOARD_IMG_CONNECT_PATH = "/sweetNetImg/images_dashboard";
 	public static String DASHBOARD_IMG_PATH = "/home/hsa" + DASHBOARD_IMG_CONNECT_PATH;
+
+	public static String IMAGE_PATH = "/home/hsa/sweetNetImg/images";
 
 	public static String PHONE_REGEX = "(09)+[\\d]{8}";
 	public static String MAIL_REGEX = "^\\w{1,63}@[a-zA-Z0-9]{2,63}\\.[a-zA-Z]{2,63}(\\.[a-zA-Z]{2,63})?$";
@@ -32,7 +36,9 @@ public class ConfigInfo {
 	public static String LOST_NICKNAME = "暱稱不得為空。";
 
 	public static String MAIL_USER = p.getProperty("MAIL_USER");
+	public static String MAIL_USERNAME = p.getProperty("MAIL_USERNAME");
 	public static String MAIL_PASSWORD = p.getProperty("MAIL_PASSWORD");
 	public static String MAIL_SUBTITLE_SINGN = "歡迎加入SugarDaddy";
-	public static String MAIL_CONTENT = "點擊下方連結開通帳號\n\n ";
+	public static String MAIL_SUBTITLE_FORGET = "SugarDaddy【忘記密碼】";
+	public static String MAIL_SUBTITLE_CONNECT = "SugarDaddy【來自用戶的問題】";
 }

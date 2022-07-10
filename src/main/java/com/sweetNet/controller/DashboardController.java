@@ -3,6 +3,8 @@ package com.sweetNet.controller;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +33,7 @@ public class DashboardController {
 	private BulletinService bulletinService;
 	@Autowired
 	private DashboardService dashboardService;
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@ApiOperation("取得全部公告訊息（含不顯示）")
 	@GetMapping(value = "/bulletin")
@@ -42,7 +45,7 @@ public class DashboardController {
 	@ApiOperation("僅顯示公開訊息")
 	@GetMapping(value = "/publicbulletin")
 	protected List<Bulletin> getBulletinByStates() {
-		return bulletinService.findBySates(0);
+		return bulletinService.findBySates();
 	}
 
 	@ApiOperation("取得單一筆公告")
@@ -64,6 +67,13 @@ public class DashboardController {
 		bulletin.setUpdateTime(new Date());
 		bulletinService.save(bulletin);
 		return bulletin;
+	}
+
+	@ApiOperation("刪除公告")
+	@DeleteMapping(value = "/bulletin/{id}")
+	protected List<Bulletin> deleteBulletinById(@PathVariable Integer id) {
+		bulletinService.delete(id);
+		return bulletinService.findAll();
 	}
 
 	@ApiOperation("取得面板顯示")
@@ -88,11 +98,5 @@ public class DashboardController {
 		return dashboardService.findAll();
 
 	}
-	
-	@ApiOperation("刪除公告")
-	@DeleteMapping(value = "/bulletin/{id}")
-	protected List<Bulletin> deleteBulletinById(@PathVariable Integer id) {
-		 bulletinService.delete(id);
-		return bulletinService.findAll();
-	}
+
 }

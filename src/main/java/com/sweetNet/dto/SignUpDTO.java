@@ -5,7 +5,8 @@ import javax.validation.constraints.Email;
 import io.swagger.annotations.ApiModelProperty;
 
 public class SignUpDTO {
-
+	private String memUuid;
+	
 	@ApiModelProperty("電子信箱")
 	@Email
 	private String memMail;
@@ -27,14 +28,22 @@ public class SignUpDTO {
 		super();
 	}
 
-	public SignUpDTO(String memMail, String memPwd, String memNickname, String memDep, Integer memSex) {
+	public SignUpDTO(String memMail, String memPwd, String memNickname, String memDep, Integer memSex, String memUuid) {
 		super();
 		this.memMail = memMail;
 		this.memPwd = memPwd;
 		this.memNickname = memNickname;
 		this.memDep = memDep;
 		this.memSex = memSex;
+		this.memUuid = memUuid;
+	}
 
+	public String getMemUuid() {
+		return memUuid;
+	}
+
+	public void setMemUuid(String memUuid) {
+		this.memUuid = memUuid;
 	}
 
 	public String getMemMail() {

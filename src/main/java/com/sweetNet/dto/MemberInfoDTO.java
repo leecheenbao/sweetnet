@@ -32,9 +32,9 @@ public class MemberInfoDTO {
 
 	private Integer memSmoke;
 
-	private Integer memIncome;
+	private Integer memIncome = 0;
 
-	private Integer memAssets;
+	private Integer memAssets = 0;
 
 	private Integer memIsvip;
 

@@ -53,9 +53,12 @@ public class MemberDTO {
 	private Integer memSta;
 
 	private String memAbout;
+
 	private Integer memBody;
 
 	private Integer memPattern;
+
+	private Integer memSeq;
 
 	public MemberDTO() {
 		super();
@@ -117,6 +120,14 @@ public class MemberDTO {
 
 	public String getMemUuid() {
 		return memUuid;
+	}
+
+	public Integer getMemSeq() {
+		return memSeq;
+	}
+
+	public void setMemSeq(Integer memSeq) {
+		this.memSeq = memSeq;
 	}
 
 	public void setMemUuid(String memUuid) {

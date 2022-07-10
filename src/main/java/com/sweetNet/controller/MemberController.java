@@ -3,13 +3,11 @@ package com.sweetNet.controller;
 import java.security.SignatureException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 import javax.security.auth.message.AuthException;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.jboss.aerogear.security.otp.api.Base32;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,20 +27,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.google.gson.Gson;
 import com.infobip.sms.SendSmsBasic;
+import com.sweetNet.dto.MailDTO;
 import com.sweetNet.dto.MemberDTO;
 import com.sweetNet.dto.MemberInfoDTO;
 import com.sweetNet.dto.PhoneOtpDTO;
 import com.sweetNet.dto.SearchConditionDTO;
 import com.sweetNet.dto.SignUpDTO;
 import com.sweetNet.model.Images;
+import com.sweetNet.model.JsonResult;
 import com.sweetNet.model.Member;
 import com.sweetNet.repository.MemberRepository;
 import com.sweetNet.service.ImagesService;
 import com.sweetNet.service.MemberService;
+import com.sweetNet.serviceImpl.MemberServiceImpl;
 import com.sweetNet.until.AesHelper;
 import com.sweetNet.until.ConfigInfo;
 import com.sweetNet.until.JwtTokenUtils;
@@ -72,11 +76,10 @@ public class MemberController {
 
 	private static Boolean tokenCheck = false;
 
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
+
 	/**
 	 * 建立會員帳號
-	 * 
-	 * @param request
-	 * @return JSONObject
 	 */
 	@ApiImplicitParams({
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memMail", value = "會員電子郵件（）", example = "sweetnet@gmail.com"),
@@ -86,11 +89,11 @@ public class MemberController {
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "Integer", name = "memSex", value = "性別（0：女生、1：男生）", example = "1") })
 	@ApiOperation("建立會員帳號")
 	@PostMapping(value = "/user")
-	public String createAccount(@RequestBody @Valid SignUpDTO signUpDTO) {
+	public String createAccount(HttpServletRequest requset, @RequestBody @Valid SignUpDTO signUpDTO) {
 		Member member = new Member();
 		String msg = ConfigInfo.SYS_MESSAGE_SUCCESS;
 		String states = ConfigInfo.DATA_OK;
-
+		String action = request.getServletPath().replace("/", "");
 		try {
 
 			String memUuid = UUID.randomUUID().toString();
@@ -99,7 +102,8 @@ public class MemberController {
 			String memNickname = signUpDTO.getMemNickname();
 			String memDep = signUpDTO.getMemDep();
 			Integer memSex = signUpDTO.getMemSex();
-
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			String memRdate = sdf.format(new Date());
 			MemberDTO memberDTOcheck = memberService.findOneByEmail(memMail);
 			if (memberDTOcheck.getMemMail() != null) {
 				msg = ConfigInfo.ALREADY_REGISTER;
@@ -113,11 +117,14 @@ public class MemberController {
 				member.setMemNickname(memNickname);
 				member.setMemDep(memDep);
 				member.setMemSex(memSex);
+				member.setMemRdate(memRdate);
 				memberService.save(member);
+
 				SendMail sendMail = new SendMail();
-				sendMail.sendMail_SugarDaddy(ConfigInfo.MAIL_SUBTITLE_SINGN, ConfigInfo.MAIL_CONTENT, memMail);
+				sendMail.sendMail_SugarDaddy(action, memUuid, memMail);
 			}
 		} catch (Exception e) {
+			logger.debug("message", e.getMessage());
 			e.printStackTrace();
 			msg = ConfigInfo.SYS_MESSAGE_ERROR;
 			states = ConfigInfo.DATA_FAIL;
@@ -133,10 +140,57 @@ public class MemberController {
 	}
 
 	/**
+	 * 開通會員狀態 - 寄驗證信到信箱
+	 */
+	@ApiOperation("開通會員狀態 - 寄驗證信到信箱從信箱點擊")
+	@GetMapping(value = "/user/{memUuid}")
+	public RedirectView updateAccount(@PathVariable String memUuid) {
+		MemberDTO memberDTO = new MemberDTO();
+		memberDTO = memberService.findOneByUuid(memUuid);
+		if (memberDTO != null) {
+			memberDTO.setMemSta(1);
+			Member member = new MemberServiceImpl().getMemberFromMemberDTO(memberDTO);
+			memberService.save(member);
+		}
+		String url = "http://sugarbabytw.com:8083/sugardaddyDevelop/dist/login/";
+		return new RedirectView(url); // 重新導向到指定的url
+	}
+
+	/**
+	 * 忘記密碼 - 寄驗證信到信箱從信箱點擊導至到更改密碼頁
+	 */
+	@ApiOperation("忘記密碼 - 寄驗證信到信箱從信箱點擊導至到更改密碼頁")
+	@PutMapping(value = "/updatePWD")
+	public RedirectView updatePwd(@RequestBody SignUpDTO signUpDTO) {
+		MemberDTO memberDTO = new MemberDTO();
+		logger.info("data", signUpDTO.getMemUuid());
+		memberDTO = memberService.findOneByUuid(signUpDTO.getMemUuid());
+		String pwd = AesHelper.encrypt(signUpDTO.getMemPwd());
+		if (memberDTO.getMemMail().equals(signUpDTO.getMemMail())) {
+			Member member = new MemberServiceImpl().getMemberFromMemberDTO(memberDTO);
+			member.setMemPwd(pwd);
+			memberService.save(member);
+		}
+		String url = ConfigInfo.REAL_PATH + "/sugardaddyDevelop/dist/login/";
+		return new RedirectView(url); // 重新導向到指定的url
+	}
+
+	/**
+	 * 連絡站長
+	 */
+	@ApiOperation("連絡站長")
+	@PostMapping(value = "/mailtoadmin")
+	public JsonResult<List<MailDTO>> mailToAdmin(@Valid @RequestBody MailDTO mailDTO) {
+		logger.info("日誌輸出");
+		List<MailDTO> list = new ArrayList<>();
+		SendMail sendMail = new SendMail();
+		sendMail.sendMailToAdmin(mailDTO.getName(), mailDTO.getMail(), mailDTO.getContent());
+		list.add(mailDTO);
+		return new JsonResult<>(list);
+	}
+
+	/**
 	 * 填寫會員資料
-	 * 
-	 * @param request
-	 * @return
 	 */
 	@ApiImplicitParams({ @ApiImplicitParam(paramType = "header", name = "Authorization", value = "JWT Token"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memName", value = "姓名", example = "Paul"),
@@ -168,13 +222,11 @@ public class MemberController {
 
 		String states = ConfigInfo.DATA_ERR_SYS;
 		String msg = "";
-		Pattern pattern = Pattern.compile(ConfigInfo.PHONE_REGEX);
 		try {
 
 			tokenCheck = JwtTokenUtils.validateToken(token);
 
 			if (tokenCheck) {
-
 				String memName = memberInfoDTO.getMemName();
 				String memNickname = memberInfoDTO.getMemNickname();
 				String memPhone = memberInfoDTO.getMemPhone();
@@ -189,7 +241,7 @@ public class MemberController {
 //				Integer memMarry = Integer.valueOf(memberInfoDTO.getMemEdu());
 //				Integer memAlcohol = Integer.valueOf(memberInfoDTO.getMemAlcohol());
 //				Integer memSmoke = Integer.valueOf(memberInfoDTO.getMemSmoke());
-//				Integer memIncome = Integer.valueOf(memberInfoDTO.getMemIncome());
+				Integer memIncome = Integer.valueOf(memberInfoDTO.getMemIncome());
 				Integer memBody = Integer.valueOf(memberInfoDTO.getMemBody());
 
 				Integer memPattern = Integer.valueOf(memberInfoDTO.getMemPattern());
@@ -201,10 +253,12 @@ public class MemberController {
 				}
 
 				// 今日日期
-				SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd");
-				Calendar calendar = Calendar.getInstance();
-				Date dateObj = calendar.getTime();
-				String mem_rdate = dtf.format(dateObj);
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				String memRdate = sdf.format(new Date());
+
+//				Date date = new Date();
+//				date = sdf.format(date);
+
 				Integer memSta = 1;
 
 				Member member = new Member();
@@ -218,6 +272,7 @@ public class MemberController {
 				member.setMemPhone(memberDTO.getMemPhone());
 				member.setPhoneStates(memberDTO.getPhoneStates());
 
+				member.setMemSeq(memberDTO.getMemSeq());
 				member.setMemUuid(memUuid);
 				member.setMemName(memName);
 				member.setMemNickname(memNickname);
@@ -231,12 +286,12 @@ public class MemberController {
 //				member.setMemMarry(memMarry);
 //				member.setMemAlcohol(memAlcohol);
 //				member.setMemSmoke(memSmoke);
-//				member.setMemIncome(memIncome);
+				member.setMemIncome(memIncome);
 				member.setMemBody(memBody);
 				member.setMemPattern(memPattern);
 				member.setMemAssets(memAssets);
 				member.setMemIsvip(memIsvip);
-				member.setMemRdate(mem_rdate);
+				member.setMemRdate(memRdate);
 				member.setMemSta(memSta);
 				member.setMemAbout(memAbout);
 				member.setMemDep(memDep);
@@ -248,7 +303,45 @@ public class MemberController {
 
 			}
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
-			e.printStackTrace();
+			logger.debug("message", e.getMessage());
+			states = ConfigInfo.DATA_FAIL;
+			msg = e.getMessage();
+		}
+
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("states", states);
+		map.put("msg", msg);
+
+		Gson gson = new Gson();
+
+		return gson.toJson(map);
+	}
+
+	@ApiOperation("管理員更改會員狀態")
+	@PutMapping(value = "/user/{memUuid}/{memSta}/{memIsvip}")
+	public String updateAccountInfo(@RequestHeader("Authorization") String au, @PathVariable String memUuid,
+			@PathVariable Integer memSta, @PathVariable Integer memIsvip) {
+
+		String token = au.substring(7);
+
+		String states = ConfigInfo.DATA_ERR_SYS;
+		String msg = "";
+		try {
+			tokenCheck = JwtTokenUtils.validateToken(token);
+			if (tokenCheck) {
+				MemberDTO memberDTO = memberService.findOneByUuid(memUuid);
+				if (memberDTO != null) {
+					Member member = new MemberServiceImpl().getMemberFromMemberDTO(memberDTO);
+					member.setMemSta(memSta);
+					member.setMemIsvip(memIsvip);
+					memberService.save(member);
+					states = ConfigInfo.DATA_OK;
+					msg = ConfigInfo.SYS_MESSAGE_SUCCESS;
+				}
+			}
+
+		} catch (TokenExpiredException | AuthException | SignatureException e) {
+			logger.debug("message", e.getMessage());
 			states = ConfigInfo.DATA_FAIL;
 			msg = e.getMessage();
 		}
@@ -264,9 +357,6 @@ public class MemberController {
 
 	/**
 	 * 顯示個人資料
-	 * 
-	 * @param request
-	 * @return JSONObject
 	 */
 	@ApiOperation("顯示個人資料")
 	@GetMapping(value = "/user")
@@ -301,73 +391,11 @@ public class MemberController {
 
 	/**
 	 * 顯示會員資料 - 以性別分類男生只能看到女生，女生只能看到男生
-	 * 
-	 * @param request
-	 * @return JSONObject
 	 */
-	@ApiOperation("顯示會員資料 - 以登入會員的性別分類，男生只能看到女生、女生只能看到男生並加入以縣市搜尋")
-	@GetMapping(value = "/users/{city}")
-	public List<Map<Object, Object>> getUserInfoByCity(@RequestHeader("Authorization") String au,
-			@PathVariable String city) {
-		List<Map<Object, Object>> result = new ArrayList<Map<Object, Object>>();
-		String token = au.substring(7);
-		List<MemberDTO> memberDTOs = new ArrayList<MemberDTO>();
-
-		try {
-
-			String memUuid = JwtTokenUtils.getJwtMemUuid(token);
-			tokenCheck = JwtTokenUtils.validateToken(token);
-
-			if (tokenCheck) {
-
-				MemberDTO memberDTO = memberService.findOneByUuid(memUuid);
-
-				Integer memSex = memberDTO.getMemSex();
-				String memArea = city;
-
-				/* 取得異性代碼 */
-				if (memSex == 1) {
-					memSex = 2;
-					memberDTOs = memberService.findByMemSexAndMemArea(memSex, memArea);
-				} else if (memSex == 2) {
-					memSex = 1;
-					memberDTOs = memberService.findByMemSexAndMemArea(memSex, memArea);
-				} else if (memSex == 0) {
-					memberDTOs = memberService.findAll();
-				}
-
-				for (MemberDTO member : memberDTOs) {
-					String uuid = member.getMemUuid();
-					Images images = imagesService.findByMemUuid(uuid);
-					Map<Object, Object> map = new HashMap<Object, Object>();
-					if (images != null && uuid.equals(images.getMemUuid())) {
-						map.put("images", images);
-					} else {
-						map.put("images", null);
-					}
-					map.put("member", member);
-
-					result.add(map);
-				}
-
-			}
-		} catch (TokenExpiredException | AuthException | SignatureException e) {
-			e.printStackTrace();
-		}
-
-		return result;
-	}
-
-	/**
-	 * 顯示會員資料 - 以性別分類男生只能看到女生，女生只能看到男生
-	 * 
-	 * @param request
-	 * @return JSONObject
-	 */
-	@ApiOperation("顯示會員資料 - 以登入會員的性別分類，男生只能看到女生、女生只能看到男生")
-	@GetMapping(value = "/users")
+	@ApiOperation("顯示會員資料 - 以登入會員的性別分類，男生只能看到女生、女生只能看到男生(action:hot=依照活躍度、new=新會員、normal)")
+	@GetMapping(value = "/users/{action}")
 	public List<Map<Object, Object>> getUserInfoBySex(@RequestHeader("Authorization") String au,
-			SearchConditionDTO searchConditionDTO) {
+			SearchConditionDTO searchConditionDTO, @PathVariable String action) {
 		List<Map<Object, Object>> result = new ArrayList<Map<Object, Object>>();
 		String token = au.substring(7);
 		List<MemberDTO> memberDTOs = new ArrayList<MemberDTO>();
@@ -381,9 +409,9 @@ public class MemberController {
 				MemberDTO memberDTO = memberService.findOneByUuid(memUuid);
 
 				searchConditionDTO.setMemSex(memberDTO.getMemSex());
+				memberDTOs = memberService.findByCondition(action, searchConditionDTO);
 
-				memberDTOs = memberService.findByCondition(searchConditionDTO);
-
+				logger.info("取得會員資料共" + memberDTOs.size() + "筆會員資料");
 				for (MemberDTO member : memberDTOs) {
 					String uuid = member.getMemUuid();
 					Images images = imagesService.findByMemUuid(uuid);
@@ -494,16 +522,21 @@ public class MemberController {
 		return gson.toJson(map);
 	}
 
-	public Map<String, String> resultMap(String msg, String states) {
-		Map<String, String> map = new HashMap<String, String>();
-		map.put("msg", msg);
-		map.put("states", states);
-		return map;
-	}
-
 	public String OTPMsg(String otp) {
 		String otpMessage = "您的OTP驗證碼： " + otp + " 請於60秒內輸入驗證";
 		return otpMessage;
+	}
+
+	/* 驗證VIP */
+	public boolean checkIsVIP(MemberDTO memberDTO) {
+		boolean check = memberDTO.getMemIsvip() == 1;
+		return check;
+	}
+
+	/* 驗證會員狀態 */
+	public boolean checkIsMemStates(MemberDTO memberDTO) {
+		boolean check = memberDTO.getMemSta() == 1;
+		return check;
 	}
 
 }
