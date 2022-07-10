@@ -6,9 +6,9 @@ public class ConfigInfo {
 	public static String target = "dev";
 
 	// 讀檔路徑
-//	public static String FILE_PATH = "/home/hsa/config/";
+	public static String FILE_PATH = "/home/hsa/config/";
 	public static String REAL_PATH = "http://sugarbabytw.com:8083";
-	public static String FILE_PATH = "D:/config/";
+//	public static String FILE_PATH = "D:/config/";
 //	public static String REAL_PATH = "http://localhost:8083";
 
 	public static Properties p = PropUtil.getProperty(FILE_PATH + "sweetNet.properties");

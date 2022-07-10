@@ -15,11 +15,9 @@ public class ImageUntil {
 	private static String getBase64Format(final String base64ImgData) {
 		// 從前端取得完整Base64含前綴
 		String base64string = base64ImgData.trim();
-
 		// 取得前綴定位
 		int index = base64string.indexOf("base64,") + 7;
 		String newImage = base64string.substring(index, base64string.length());// 去除前缀
-
 		return newImage;
 	}
 
@@ -154,8 +152,6 @@ public class ImageUntil {
 				file.delete();
 			}
 			file.delete();
-		} else {
-			System.out.println("該file路徑不存在！！");
 		}
 	}
 
@@ -165,7 +161,7 @@ public class ImageUntil {
 
 		String filePath = "/home/hsa/sweetNetImg/images";
 		URL = filePath + "/" + url[url.length - 2] + "/" + url[url.length - 1];
-		
+
 		System.out.println(URL);
 //		deleteFile(URL);
 	}
