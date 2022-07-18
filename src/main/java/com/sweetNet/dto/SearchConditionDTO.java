@@ -10,6 +10,8 @@ public class SearchConditionDTO {
 	private Integer heightMax;
 	private Integer memPattern;
 	private Integer memSex;
+	private Integer ageMax = 0;
+	private Integer ageMin = 0;
 
 	public SearchConditionDTO() {
 		super();
@@ -26,6 +28,22 @@ public class SearchConditionDTO {
 		this.heightMax = heightMax;
 		this.memPattern = memPattern;
 		this.memSex = memSex;
+	}
+
+	public Integer getAgeMax() {
+		return ageMax;
+	}
+
+	public void setAgeMax(Integer ageMax) {
+		this.ageMax = ageMax;
+	}
+
+	public Integer getAgeMin() {
+		return ageMin;
+	}
+
+	public void setAgeMin(Integer ageMin) {
+		this.ageMin = ageMin;
 	}
 
 	public Integer getMemPattern() {

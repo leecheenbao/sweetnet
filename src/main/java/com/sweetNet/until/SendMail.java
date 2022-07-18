@@ -48,7 +48,17 @@ public class SendMail {
 			}
 			if (action.equals("forget")) {
 				message.setSubject(ConfigInfo.MAIL_SUBTITLE_FORGET);
-				html = mailContent_forget(memUuid);
+				html = mailContent_Forget(memUuid);
+			}
+
+			if (action.equals("report_send")) {
+				message.setSubject(ConfigInfo.MAIL_SUBTITLE_REPORT_SEND);
+				html = mailContent_Report_Send(memUuid);
+			}
+
+			if (action.equals("report_rec")) {
+				message.setSubject(ConfigInfo.MAIL_SUBTITLE_REPORT_REC);
+				html = mailContent_Report_Rec(memUuid);
 			}
 
 			textPart.setContent(html.toString(), "text/html; charset=UTF-8");
@@ -138,7 +148,7 @@ public class SendMail {
 		return props;
 	}
 
-	public StringBuffer mailContent_forget(String memUuid) {
+	public StringBuffer mailContent_Forget(String memUuid) {
 		StringBuffer html = new StringBuffer();
 		html.append("<h2>忘記密碼</h2><br>");
 		html.append("<h3>請盡速修改你的密碼</h3><br>");
@@ -162,7 +172,25 @@ public class SendMail {
 		StringBuffer html = new StringBuffer();
 		html.append("<h3>稱呼：" + name + "</h3><br>");
 		html.append("<h3>聯絡信箱：" + mail + "</h3><br>");
-		html.append("<h3>聯繫內容：" + content + "</h3><br>");
+		html.append("<h3>聯繫內容：</h3><br>");
+		html.append("<div>" + content + "</div><br>");
+		return html;
+	}
+
+	public StringBuffer mailContent_Report_Send(String memUuid) {
+		StringBuffer html = new StringBuffer();
+		html.append("<h2>您檢舉的案件已經成立</h2><br>");
+		html.append("<h3>版主會盡速處理</h3><br>");
+		html.append("<img src='cid:image'/><br>");
+
+		return html;
+	}
+
+	public StringBuffer mailContent_Report_Rec(String memUuid) {
+		StringBuffer html = new StringBuffer();
+		html.append("<h2>您的行為可能有些不妥</h2><br>");
+		html.append("<h3>請檢查是否有不當留言，或是不當的照片</h3><br>");
+		html.append("<img src='cid:image'/><br>");
 
 		return html;
 	}

@@ -1,5 +1,6 @@
 package com.sweetNet.controller;
 
+import java.io.IOException;
 import java.security.SignatureException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.jboss.aerogear.security.otp.api.Base32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,6 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.google.gson.Gson;
-import com.infobip.sms.SendSmsBasic;
 import com.sweetNet.dto.MailDTO;
 import com.sweetNet.dto.MemberDTO;
 import com.sweetNet.dto.MemberInfoDTO;
@@ -50,6 +49,7 @@ import com.sweetNet.until.ConfigInfo;
 import com.sweetNet.until.JwtTokenUtils;
 import com.sweetNet.until.PhoneUtil;
 import com.sweetNet.until.SendMail;
+import com.sweetNet.until.VerifyRecaptcha;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -152,7 +152,7 @@ public class MemberController {
 			Member member = new MemberServiceImpl().getMemberFromMemberDTO(memberDTO);
 			memberService.save(member);
 		}
-		String url = "http://sugarbabytw.com:8083/sugardaddyDevelop/dist/login/";
+		String url = "https://sugarbabytw.com:8443/sugardaddyDevelop/dist/login/";
 		return new RedirectView(url); // 重新導向到指定的url
 	}
 
@@ -181,11 +181,32 @@ public class MemberController {
 	@ApiOperation("連絡站長")
 	@PostMapping(value = "/mailtoadmin")
 	public JsonResult<List<MailDTO>> mailToAdmin(@Valid @RequestBody MailDTO mailDTO) {
-		logger.info("日誌輸出");
 		List<MailDTO> list = new ArrayList<>();
 		SendMail sendMail = new SendMail();
 		sendMail.sendMailToAdmin(mailDTO.getName(), mailDTO.getMail(), mailDTO.getContent());
 		list.add(mailDTO);
+		return new JsonResult<>(list);
+	}
+
+	/**
+	 * 驗證reCAPTCHA
+	 * 
+	 * @return
+	 */
+	@ApiOperation("驗證reCAPTCHA")
+	@PostMapping(value = "/verifyToken")
+	public <T> JsonResult JsonResultverify(HttpServletRequest request, @Valid @RequestBody String token) {
+		String response = request.getParameter("g-recaptcha-response");
+		logger.info("日誌輸出");
+
+		List list = new ArrayList<>();
+		try {
+			boolean check = VerifyRecaptcha.isValid(token);
+
+			list.add(check);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return new JsonResult<>(list);
 	}
 
@@ -412,19 +433,22 @@ public class MemberController {
 				memberDTOs = memberService.findByCondition(action, searchConditionDTO);
 
 				logger.info("取得會員資料共" + memberDTOs.size() + "筆會員資料");
+				Integer count = 0;
 				for (MemberDTO member : memberDTOs) {
 					String uuid = member.getMemUuid();
 					Images images = imagesService.findByMemUuid(uuid);
 					Map<Object, Object> map = new HashMap<Object, Object>();
+					logger.info(uuid + "/////照片///" + (images != null && uuid.equals(images.getMemUuid())));
 					if (images != null && uuid.equals(images.getMemUuid())) {
 						map.put("images", images);
+						count++;
 					} else {
 						map.put("images", null);
 					}
 					map.put("member", member);
-
 					result.add(map);
 				}
+				logger.info("有照片的會員" + count + "筆會員資料");
 			}
 		} catch (TokenExpiredException | AuthException | SignatureException e) {
 			e.printStackTrace();
@@ -433,47 +457,6 @@ public class MemberController {
 		return result;
 	}
 
-	@ApiImplicitParams({ @ApiImplicitParam(paramType = "header", name = "Authorization", value = "JWT Token"),
-			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memPhone", value = "電話號碼", example = "0919268790"),
-			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "otp", value = "（不填）"),
-			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "secret", value = "（不填）") })
-	@ApiOperation("發送OTP簡訊")
-	@PostMapping(value = "/OTP/sendOTP")
-	public String sendSMS(@RequestHeader("Authorization") String au, @RequestBody @Valid PhoneOtpDTO phoneOtpDTO) {
-		Gson gson = new Gson();
-		Map<String, String> map = new HashMap<String, String>();
-
-		String token = au.substring(7);
-		String msg = ConfigInfo.SYS_MESSAGE_SUCCESS;
-		String states = ConfigInfo.DATA_OK;
-
-		try {
-
-			tokenCheck = JwtTokenUtils.validateToken(token);
-
-			if (tokenCheck) {
-				PhoneUtil pu = new PhoneUtil();
-				String recipient = pu.checkPhone(phoneOtpDTO.getMemPhone());
-				String secret = Base32.random();
-				String OTP = pu.creatOTP(secret);
-
-				SendSmsBasic.sendSMS(recipient, this.OTPMsg(OTP));
-
-				map.put("OTP", OTP);
-				map.put("secret", secret);
-			}
-
-		} catch (TokenExpiredException | AuthException | SignatureException e) {
-			e.printStackTrace();
-			states = ConfigInfo.DATA_FAIL;
-			msg = e.getMessage();
-		}
-
-		map.put("states", states);
-		map.put("msg", msg);
-
-		return gson.toJson(map);
-	}
 
 	@ApiImplicitParams({ @ApiImplicitParam(paramType = "header", name = "Authorization", value = "JWT Token"),
 			@ApiImplicitParam(paramType = "query", required = false, dataType = "String", name = "memPhone", value = "電話號碼（不填）"),

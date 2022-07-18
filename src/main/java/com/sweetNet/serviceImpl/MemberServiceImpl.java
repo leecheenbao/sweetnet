@@ -15,6 +15,7 @@ import com.sweetNet.dto.SearchConditionDTO;
 import com.sweetNet.model.Member;
 import com.sweetNet.repository.MemberRepository;
 import com.sweetNet.service.MemberService;
+import com.sweetNet.until.Until;
 
 @Service
 public class MemberServiceImpl implements MemberService {
@@ -31,6 +32,12 @@ public class MemberServiceImpl implements MemberService {
 		Integer weightMax = searchConditionDTO.getWeightMax();
 		Integer memPattern = searchConditionDTO.getMemPattern();
 		Integer memSex = searchConditionDTO.getMemSex();
+		Integer ageMax = searchConditionDTO.getAgeMax();
+		Integer ageMin = searchConditionDTO.getAgeMin();
+
+		/* 計算會員年齡區間 */
+		String dateMax = String.valueOf(Until.getDateFromAge(ageMax));
+		String dateMin = String.valueOf(Until.getDateFromAge(ageMin));
 
 		/* 僅能瀏覽異性資料 */
 		if (memSex > 0) {
@@ -46,7 +53,7 @@ public class MemberServiceImpl implements MemberService {
 		}
 
 		List<Member> members = memberRepository.findCondiction(memCountry, memArea, heightMin, heightMax, weightMin,
-				weightMax, memPattern, pageable);
+				weightMax, ageMin, ageMax, memPattern, pageable);
 		List<MemberDTO> memberDTOs = new ArrayList<MemberDTO>();
 		for (Member member : members) {
 			if (member.getMemSex() != memSex && member.getMemSex() > 0) {

@@ -1,6 +1,7 @@
 package com.sweetNet.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,41 +9,60 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.annotations.CreationTimestamp;
+
+import io.swagger.annotations.ApiModelProperty;
 
 @Entity
 @Table(name = "MESSAGE")
 public class Message implements Serializable {
 
-	private static long serialVersionUID = 1L;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private Integer id;
 
-	@Column(name = "messageId")
-	private String messageId;
-
+	@NotNull
 	@Column(name = "sendId")
 	private String sendId;
 
+	@NotNull
 	@Column(name = "recId")
 	private String recId;
+	
+	@NotNull
+	@Column(name = "content")
+	private String content;
+
+	@ApiModelProperty("更新時間-系統自增")
+	@CreationTimestamp
+	@Column(name = "pdate")
+	private Date pdate;
 
 	@Column(name = "states")
-	private Integer states;
+	private Integer states = 0;
 
-	public Message() {
-		super();
+	public String getContent() {
+		return content;
 	}
 
-	public Message(Integer id, String messageId, String sendId, String recId, Integer states) {
-		super();
+	public void setContent(String content) {
+		this.content = content;
+	}
 
-		this.id = id;
-		this.messageId = messageId;
-		this.sendId = sendId;
-		this.recId = recId;
-		this.states = states;
+	public Date getPdate() {
+		return pdate;
+	}
+
+	public void setPdate(Date pdate) {
+		this.pdate = pdate;
 	}
 
 	public Integer getId() {
@@ -51,14 +71,6 @@ public class Message implements Serializable {
 
 	public void setId(Integer id) {
 		this.id = id;
-	}
-
-	public String getMessageId() {
-		return messageId;
-	}
-
-	public void setMessageId(String messageId) {
-		this.messageId = messageId;
 	}
 
 	public String getSendId() {

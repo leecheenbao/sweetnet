@@ -1,6 +1,7 @@
 package com.sweetNet.service;
 
 import java.util.List;
+import java.util.Set;
 
 import com.sweetNet.model.Message;
 
@@ -8,11 +9,11 @@ public interface MessageService {
 
 	List<Message> findAll();
 
-	void save(Message contact);
+	void save(Message message);
 
-	Message findByMsgId(String messageId);
+	void delete(String id);
 
-	List<Message> findByRecId(String redId);
+	List<Message> findBySendIdAndRecId(String sendId, String recId, Integer states);
 
-	List<Message> findBySendId(String sendId);
+	Set<String> findByRecId(String recId);
 }

@@ -13,6 +13,28 @@ import com.google.gson.JsonObject;
 
 public class Until {
 
+	public static void main(String[] args) {
+		Until.getDateFromAge(10);
+	}
+
+	/* 計算註冊天數 */
+	public static String getDateFromAge(Integer age) {
+		String ageDate = "";
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			Long date = new Date().getTime();
+			Long time = (long) (1000 * 60 * 60 * 24);
+			Long day = date - (time * 365 * 10);
+
+			Date d = new Date(day);
+			ageDate = sdf.format(d);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+//		Integer count = (betweenDate == 0) ? 1 : Math.toIntExact(betweenDate + 1);
+		return ageDate;
+	}
+
 	/* 計算會員活躍度分數 */
 	public static Integer getAccountValue(Integer memLgd, Integer count, Integer memIsVip) {
 		double bonus = (memIsVip == 1) ? 1.5 : 1;

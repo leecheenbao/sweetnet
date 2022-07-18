@@ -1,7 +1,10 @@
 package com.sweetNet.until;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -12,8 +15,10 @@ import org.springframework.stereotype.Component;
 
 import com.sweetNet.dto.MemberDTO;
 import com.sweetNet.model.Images;
+import com.sweetNet.model.Member;
 import com.sweetNet.service.ImagesService;
 import com.sweetNet.service.MemberService;
+import com.sweetNet.serviceImpl.MemberServiceImpl;
 
 @Component
 public class ScheduledTasks {
@@ -26,7 +31,7 @@ public class ScheduledTasks {
 	private ImagesService imagesService;
 
 	@Scheduled(fixedRate = 60 * 1000 * 60) // fixedRate = 60000 表示當前方法開始執行 60000ms(1分鐘) 後，Spring scheduling會再次呼叫該方法
-	public void testFixedRate() {
+	public void checkImage() {
 
 		List<MemberDTO> memberDTOs = memberService.findAll();
 
@@ -36,7 +41,7 @@ public class ScheduledTasks {
 			Images images = imagesService.findByMemUuid(memUuid);
 
 			if (images != null) {
-				List list = new ArrayList();
+				List<String> list = new ArrayList<String>();
 
 				String path = ConfigInfo.REAL_PATH + "/sweetNetImg/images/" + memUuid;
 				/* 檢查該會員的圖片DB欄位是否是空的 */
@@ -62,7 +67,7 @@ public class ScheduledTasks {
 		logger.info("執行排程 >> deleteImgEnd ");
 	}
 
-	private void checkFile(String fileDir, List list) {
+	private void checkFile(String fileDir, List<String> list) {
 
 		List<File> fileList = new ArrayList<File>();
 		File file = new File(fileDir);
@@ -98,8 +103,39 @@ public class ScheduledTasks {
 		}
 	}
 
+//	@Scheduled(fixedRate = 60 * 1000 * 60 * 24) // fixedRate = 60000 表示當前方法開始執行 60000ms(1分鐘) 後，Spring scheduling會再次呼叫該方法
+	public void checkAge() {
+
+		List<MemberDTO> memberDTOs = memberService.findAll();
+		try {
+			logger.info("執行排程 >> updateAge ");
+			for (MemberDTO memberDTO : memberDTOs) {
+				String memUuid = memberDTO.getMemUuid();
+				String birthdayStr = memberDTO.getMemBirthday();
+				String todayStr = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				if (!birthdayStr.equals("")) {
+
+					Date today = sdf.parse(todayStr);
+					Date birthday = sdf.parse(birthdayStr);
+					Long time = today.getTime() - birthday.getTime();
+					Integer age = Math.round(time / 1000 / 60 / 60 / 24 / 365);
+					System.out.println(age);
+					memberDTO.setMemAge(age);
+					Member member = new MemberServiceImpl().getMemberFromMemberDTO(memberDTO);
+					memberService.save(member);
+				}
+
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		logger.info("執行排程 >> updateAge ");
+	}
+
 	public static void main(String[] args) {
-		List list = new ArrayList();
+		List<String> list = new ArrayList<String>();
 		list.add("1657167855433.png");
 		list.add("1657167872874.png");
 		list.add("1657167872894.png");

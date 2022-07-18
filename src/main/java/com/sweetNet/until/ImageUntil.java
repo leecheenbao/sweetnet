@@ -156,7 +156,7 @@ public class ImageUntil {
 	}
 
 	public static void main(String[] args) {
-		String URL = "http://sugarbabytw.com:8083/sweetNetImg/images/e8bd588c-8bc0-4b06-bf14-db8049c821de/1656783948926.png";
+		String URL = "https://sugarbabytw.com:8443/sweetNetImg/images/e8bd588c-8bc0-4b06-bf14-db8049c821de/1656783948926.png";
 		String[] url = URL.split("/");
 
 		String filePath = "/home/hsa/sweetNetImg/images";
